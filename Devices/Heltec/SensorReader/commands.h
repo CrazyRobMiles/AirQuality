@@ -1438,14 +1438,15 @@ void reset_settings()
 	settings.wiFiOn = true;
 
 	// enter some pre-set WiFi locations
-	strcpy(settings.wifiSettings[0].wifiSsid, "ZyXEL56E8A7");
-	strcpy(settings.wifiSettings[0].wifiPassword, "DAB6E5A9EC25");
+	// enter some pre-set WiFi locations
+	strcpy(settings.wifiSettings[0].wifiSsid, "sdfsdf");
+	strcpy(settings.wifiSettings[0].wifiPassword, "sdfsd");
 
-	strcpy(settings.wifiSettings[1].wifiSsid, "AJ_HullFromHome_F1EAA6E5");
-	strcpy(settings.wifiSettings[1].wifiPassword, "humberbridge");
+	strcpy(settings.wifiSettings[1].wifiSsid, "sdfdfdf");
+	strcpy(settings.wifiSettings[1].wifiPassword, "fdfsddf");
 
-	strcpy(settings.wifiSettings[2].wifiSsid, "Robert's iPhone");
-	strcpy(settings.wifiSettings[2].wifiPassword, "s5jmz4t8ch7gz");
+	strcpy(settings.wifiSettings[2].wifiSsid, "dsdsdffd");
+	strcpy(settings.wifiSettings[2].wifiPassword, "fdsffdsf");
 
 	// clear the rest of the settings
 	for (int i = 3; i < NO_OF_WIFI_SETTINGS; i++)

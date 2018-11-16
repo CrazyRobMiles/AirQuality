@@ -1,0 +1,422 @@
+# Version 1.0
+# Makes a box for the Heltec, SD011 sensor, BME280 and Real Time Clock
+# Runs inside Freecad. 
+# Uses absolute paths to write the output files. You might want to change these.
+# Rob Miles November 2018
+
+import Mesh
+import Part
+from FreeCAD import Base
+import sys
+
+import math
+import random
+
+heltecOverallWidth = 29.0
+heltecOverallDepth = 53.0
+heltecWallHeight=5.0
+
+ 
+def addHeltec(box_top, box_thickness, x, y ):
+
+    heltecOuterBezelWidth=15.0
+    heltecOuterBezelDepth=25.0
+    heltecOuterBezellHeight = 1.0
+#
+    heltecOLEDBoxDepth = 34.0
+    heltecOLEDBoxWidth = 21.0
+    heltecOLEDBoxHeight = 2.0
+#
+    heltecOLEDBoxXOffset = 2.0
+    heltecOLEDBoxYOffset = 4.0
+    wallWidth = 3.0
+#
+    heltecOLEDXOffset=3.0
+    heltecOLEDYOffset=8.0
+    heltecInsetDepth = 1.0
+#
+#   X and Y are the origin of the display hole. The device fits behind this in a slot.
+    heltecX = x 
+    heltecY = y 
+    heltecZ = box_thickness - heltecInsetDepth
+    insetBox=Part.makeBox(heltecOverallWidth,heltecOverallDepth,heltecInsetDepth,Base.Vector(heltecX,heltecY,heltecZ))
+    box_top = box_top.cut(insetBox)
+    heltecPanelBoxX = heltecX + heltecOLEDBoxXOffset
+    heltecPanelBoxY = heltecY + heltecOLEDBoxYOffset
+#
+    heltecPanelBoxX = heltecX + heltecOLEDBoxXOffset
+    heltecPanelBoxY = heltecY + heltecOLEDBoxYOffset
+	
+    heltecPanelX = heltecX + heltecOLEDXOffset
+    print "Window X:", heltecPanelX/10.0
+    heltecPanelY = heltecY + heltecOLEDYOffset
+    print "Window Y:", heltecPanelY/10.0
+    heltecPanelZ = 0.0
+    print "Window width:", heltecOLEDBoxWidth
+    print "Window height:", heltecOuterBezelDepth
+    bezelBox=Part.makeBox(heltecOuterBezelWidth,heltecOuterBezelDepth,heltecOuterBezellHeight,Base.Vector(heltecPanelX,heltecPanelY,heltecPanelZ))
+    box_top = box_top.cut(bezelBox)
+#
+    heltecPanelBoxZ = heltecOuterBezellHeight
+    panellBox=Part.makeBox(heltecOLEDBoxWidth,heltecOLEDBoxDepth,10,Base.Vector(heltecPanelBoxX,heltecPanelBoxY,heltecPanelBoxZ))
+    box_top = box_top.cut(panellBox)
+#
+#   Coil Hole
+#
+    coilX = 5.0 + heltecX
+    coilY = 40.0 + heltecY
+    coilHoleHeight = 2.5
+    coilHoleRadius = 2.5
+    coilHole =  Part.makeCylinder(coilHoleRadius,coilHoleHeight,Base.Vector(coilX,coilY,box_thickness-coilHoleHeight),Base.Vector(0,0,1))
+    box_top = box_top.cut(coilHole)
+#
+# build a wall
+#
+    wall=Part.makeBox(wallWidth,heltecOverallDepth,heltecWallHeight+box_thickness,Base.Vector(heltecX-wallWidth,heltecY,0))
+    box_top = box_top.fuse(wall)
+    wall.translate(Base.Vector(heltecOverallWidth,0,0))
+    box_top = box_top.fuse(wall)
+    return box_top
+
+
+
+def controlPanel():
+# Overall dimensions of the panel
+    panel_width=22.0
+    panel_depth=90.0
+# Inset from the edge of components
+    component_margin=5
+# Thickness of the panel being made
+    panel_thickness=3
+# Inner radius of the socket
+    socket_hole_radius=6.0
+# Height of the soccket
+    socket_height=27.0
+# Outer dimensions of the led strip
+    led_strip_outer_width=11.5
+    led_strip_outer_depth=53.0
+# Dimensions of led elements on the strip
+# Centred in depth but offset in width
+    led_strip_inner_width=6.0
+    led_strip_inner_depth=51.0
+# Led element offest from the centre line of the strip
+    led_width_offset=1.65
+# depth of slot to cut for outer led fitting
+    led_height_inset=2.0
+# insets for the mounting holes
+    mounting_hole_x_inset=8.7
+    mounting_hole_y_inset=12.7
+    mounting_hole_y_gap=25.0
+# mounting pillar dimensions
+    mounting_hole_piller_radius=2.0
+    mounting_hole_pillar_height=1.0
+    mounting_hole_radius=0.5
+    mounting_hole_height=3.0
+# support block for the edge of the leds
+    mounting_support_width=0.5
+#
+# box dimensions
+#
+    box_thickness=3.0
+    box_height=45.0
+    box_fillet_radius=3
+    box_inset_height=10.0
+    box_screw_hole_radius=1.2
+    box_screw_hole_inset=20.0
+    box_cable_hole_radius=2.5
+    box_cable_hole_inset=20.0
+    box_cable_hole_height=15.0
+#
+# Now build the boxes
+#
+# Make the outer box
+    
+    box_inner_width=80.0
+    box_width=box_inner_width+(2*box_thickness)
+    box_inner_depth=90.0
+    box_depth=box_inner_depth+(2*box_thickness)
+    box_inner_height=50.0
+    box_height = box_inner_height+(2*box_thickness)
+    box=Part.makeBox(box_width,box_depth,box_height,Base.Vector(-box_thickness,-box_thickness,0))
+#
+#   fillet the edges
+#
+    box=box.makeFillet(box_fillet_radius,box.Edges)
+#
+    box_base_height=box_height/2.0
+#
+# Now drill fitting holes for the base
+#
+    fitting_hole=Part.makeCylinder(box_screw_hole_radius,box_depth,Base.Vector(box_screw_hole_inset,-box_thickness,panel_thickness+box_base_height-(box_inset_height/2.0)-(box_screw_hole_radius/2.0)),Base.Vector(0,1,0))
+    box=box.cut(fitting_hole)
+#
+# Move to cut the second hole
+    fitting_hole.translate(Base.Vector(box_inner_width-(2*box_screw_hole_inset),0,0))
+    box=box.cut(fitting_hole)
+#
+# Now hollow out the box
+#
+    box_void=Part.makeBox(box_inner_width,box_inner_depth,box_inner_height,Base.Vector(0,0,box_thickness))
+    box=box.cut(box_void)
+#
+# Now cut the led hole
+#
+#    cable_hole=Part.makeCylinder(box_cable_hole_radius,box_thickness,Base.Vector(-box_thickness,box_inner_depth/2.0,panel_thickness+box_height-box_cable_hole_height),Base.Vector(1,0,0))
+#    box=box.cut(cable_hole)
+
+#
+#
+# Cut off the bottom of the box to make the top part
+#
+    box_top_cut=Part.makeBox(box_width,box_depth,box_base_height+box_thickness,Base.Vector(-box_thickness,-box_thickness,box_height-box_base_height+panel_thickness))
+    box_top=box.cut(box_top_cut)
+#
+# Cut out the overlap for the inset
+#
+    box_inset_cut=Part.makeBox(box_inner_width+box_thickness,box_inner_depth+box_thickness,box_inset_height,Base.Vector(-box_thickness/2.0,-box_thickness/2.0,box_height-box_base_height+box_thickness-box_inset_height))
+    box_top=box_top.cut(box_inset_cut)
+#
+# Now make the base of the box
+#
+# Cut off the bottom portion
+    box_bottom_cut=Part.makeBox(box_width,box_depth,box_base_height+panel_thickness-box_inset_height,Base.Vector(-box_thickness,-box_thickness,0))
+    box_bottom=box.cut(box_bottom_cut)
+#
+# Now cut off the top to create the lip for the overlap
+#
+    box_bottom=box_bottom.cut(box_top)
+#
+# Rotate the bottom for printing
+    box_bottom.rotate(Base.Vector(box_width/2.0,box_depth/2.0,(box_height)/2.0),Base.Vector(0,1,0),180)
+#
+# Now kit out the box bottom for the particle sensor
+#
+    sensorMountingHoleInset = 12.0
+    sensorMontingHoleSpacing = 60.0
+    sensorMountingHolePillarRadius = 3.5
+    sensorMountingHolePillarHeight =22.0
+    sensorMountingHoleDepth = 5.0
+    sensorMountingHoleRadius = 1.4
+    airInputHoleRadius = 4.0
+    smX = ((box_width-sensorMontingHoleSpacing)/2.0) + box_thickness
+    smY = sensorMountingHoleInset
+    smZ = box_thickness
+    sensorPillar = Part.makeCylinder(sensorMountingHolePillarRadius,sensorMountingHolePillarHeight,Base.Vector(smX, smY, smZ),Base.Vector(0,0,1))
+    box_bottom=box_bottom.fuse(sensorPillar)
+    sensorHole = Part.makeCylinder(sensorMountingHoleRadius,sensorMountingHoleDepth,Base.Vector(smX, smY, smZ+(sensorMountingHolePillarHeight-sensorMountingHoleDepth)),Base.Vector(0,0,1))
+    box_bottom=box_bottom.cut(sensorHole)
+    smX = smX + sensorMontingHoleSpacing
+    sensorPillar = Part.makeCylinder(sensorMountingHolePillarRadius,sensorMountingHolePillarHeight,Base.Vector(smX, smY, smZ),Base.Vector(0,0,1))
+    box_bottom=box_bottom.fuse(sensorPillar)
+    sensorHole = Part.makeCylinder(sensorMountingHoleRadius,sensorMountingHoleDepth,Base.Vector(smX, smY, smZ+(sensorMountingHolePillarHeight-sensorMountingHoleDepth)),Base.Vector(0,0,1))
+    box_bottom=box_bottom.cut(sensorHole)
+    smX = smX-41.0
+    smY = smY+55
+    sensorPillar = Part.makeCylinder(sensorMountingHolePillarRadius,sensorMountingHolePillarHeight,Base.Vector(smX, smY, smZ),Base.Vector(0,0,1))
+    box_bottom=box_bottom.fuse(sensorPillar)
+    sensorHole = Part.makeCylinder(sensorMountingHoleRadius,sensorMountingHoleDepth,Base.Vector(smX, smY, smZ+(sensorMountingHolePillarHeight-sensorMountingHoleDepth)),Base.Vector(0,0,1))
+    box_bottom=box_bottom.cut(sensorHole)
+#
+# Now the hole for the air input
+#
+    holeX = smX-5.8#
+    holeY = -box_thickness
+    holeZ = smZ+17.3
+    airInput = Part.makeCylinder(airInputHoleRadius,box_thickness,Base.Vector(holeX, holeY, holeZ),Base.Vector(0,1,0))
+    box_bottom=box_bottom.cut(airInput)
+#
+# Now cut some hotes for the air output
+#
+    ventHoleRadius = 1.0
+    ventHoleSpacing = 3.0
+    noOfVentRows = 4
+    noOfVentCols = 10
+    
+    ventHoleX = 42.0
+    ventHoleY = box_inner_depth
+    ventHoleZ = box_thickness+5.0
+    for rowCount in range(0,noOfVentRows):
+        vz = ventHoleZ + (rowCount*ventHoleSpacing)
+        for colCount in range(0,noOfVentCols):
+            vx = ventHoleX + (ventHoleSpacing*colCount)
+            ventHole = Part.makeCylinder(ventHoleRadius,box_thickness,Base.Vector(vx, ventHoleY, vz),Base.Vector(0,1,0))
+            box_bottom=box_bottom.cut(ventHole)
+
+#
+# Rotate 90 degrees to match the Arduino coordinates
+#
+#    box_bottom.rotate(Base.Vector(box_width/2.0,box_depth/2.0,(box_height+panel_thickness+box_thickness)/2),Base.Vector(0,0,1),90)
+#
+# Add the s mounting pillars
+#
+    if 1==1:
+        arduinoPillars = [[0,5],[0 ,-5]]   
+        arduinoPillarRadius = 3.0
+        arduinoPillarHeight = 5.0
+        arduinoPillarHoleRadius = 1.4
+        arduinoBaseHoleRadius = 1.4 
+        arduinoPillarHoleDepth = 10
+        ardX = arduinoPillarRadius
+        ardY = box_inner_depth / 2.0
+        for pillar in arduinoPillars:
+            outerPillar = Part.makeCylinder(arduinoPillarRadius,arduinoPillarHeight,Base.Vector(ardX + pillar[0],ardY + pillar[1],box_thickness),Base.Vector(0,0,1))
+            box_top = box_top.fuse(outerPillar)
+            pillarHole = Part.makeCylinder(arduinoPillarHoleRadius,arduinoPillarHeight,Base.Vector(ardX + pillar[0],ardY + pillar[1],box_thickness),Base.Vector(0,0,1))
+            box_top = box_top.cut(pillarHole)
+
+        baseHole = Part.makeCylinder(arduinoBaseHoleRadius,box_thickness+arduinoPillarHeight+100,Base.Vector(arduinoPillarRadius,ardY,-box_thickness),Base.Vector(0,0,1))
+        box_top = box_top.cut(baseHole)
+
+        aerialHole = Part.makeCylinder(arduinoBaseHoleRadius,box_thickness,Base.Vector(-box_thickness,ardY,15),Base.Vector(1,0,0))
+        box_top = box_top.cut(aerialHole)
+
+#
+# now add the Heltec mounting
+#   
+    heltecX = box_inner_width - heltecOverallWidth
+    heltecY = box_inner_depth - heltecOverallDepth
+    box_top = addHeltec(box_top, box_thickness, heltecX, heltecY)
+#
+# now add the pillars to hold the Heltec Clamp
+#
+    heltecPillarHeight = heltecWallHeight + 5.0
+    heltecPillarRadius = 3.0
+    heltecPillarHoleRadius = 1.4
+    heltecPillarHoleDepth = 4.0
+    heltecPillarHoleSpacing = 10.0
+    heltecDistanceBack = 10.0
+    hpx = heltecX + (heltecOverallWidth / 2.0)
+    hpy = heltecY - heltecDistanceBack
+    hpz = box_thickness
+    heltecPillar = Part.makeCylinder(heltecPillarRadius,heltecPillarHeight,Base.Vector(hpx, hpy, hpz),Base.Vector(0,0,1))
+    box_top = box_top.fuse(heltecPillar)
+    pillarHole = Part.makeCylinder(heltecPillarHoleRadius,heltecPillarHoleDepth,Base.Vector(hpx, hpy, hpz+heltecPillarHeight-heltecPillarHoleDepth),Base.Vector(0,0,1))
+    box_top = box_top.cut(pillarHole)
+    hpy = hpy-heltecPillarHoleSpacing
+    heltecPillar = Part.makeCylinder(heltecPillarRadius,heltecPillarHeight,Base.Vector(hpx, hpy, hpz),Base.Vector(0,0,1))
+    box_top = box_top.fuse(heltecPillar)
+    pillarHole = Part.makeCylinder(heltecPillarHoleRadius,heltecPillarHoleDepth,Base.Vector(hpx, hpy, hpz+heltecPillarHeight-heltecPillarHoleDepth),Base.Vector(0,0,1))
+    box_top = box_top.cut(pillarHole)
+#
+# 
+# Now create the Heltec clamp
+#
+    clampWidth = 15.0
+    clampDepth = 30.0
+    clampThickness = 3.0
+    clampMargin = 5.0
+    clampPillarOverlap = 5.0
+    clampOverPillarRadius = 4.0
+    clampOverPillarHeight = clampPillarOverlap
+    clampBoltHoleRadius = 1.6
+    clampHandleWidth =  heltecPillarRadius*2 + clampMargin
+    clampHandleDepth  = heltecPillarRadius*2 + heltecPillarHoleSpacing + clampMargin
+    clampHandleThickness = clampThickness + clampPillarOverlap
+#
+    clamp = Part.makeBox(clampWidth,clampDepth, clampThickness,Base.Vector(-clampWidth/2.0,-clampDepth,0))
+    clampHandle = Part.makeBox(clampHandleWidth,clampHandleDepth, clampHandleThickness, Base.Vector(-clampHandleWidth/2.0,0, 0))
+    clamp = clamp.fuse(clampHandle)
+    chx = 0
+    chy = clampMargin
+    chz = clampHandleThickness
+    clampPillarHole = Part.makeCylinder(clampOverPillarRadius, clampPillarOverlap, Base.Vector( chx, chy, chz), Base.Vector(0,0,-1))
+    clamp = clamp.cut(clampPillarHole)
+    clampBoltHole = Part.makeCylinder(clampBoltHoleRadius, clampHandleThickness, Base.Vector( chx, chy, chz), Base.Vector(0,0,-1))
+    clamp = clamp.cut(clampBoltHole)
+    chy = chy + heltecPillarHoleSpacing
+    clampPillarHole = Part.makeCylinder(clampOverPillarRadius, clampPillarOverlap, Base.Vector( chx, chy, chz), Base.Vector(0,0,-1))
+    clamp = clamp.cut(clampPillarHole)
+    clampBoltHole = Part.makeCylinder(clampBoltHoleRadius, clampHandleThickness, Base.Vector( chx, chy, chz), Base.Vector(0,0,-1))
+    clamp = clamp.cut(clampBoltHole)
+
+#
+# Now make the hole for the power connection
+#
+    heltecSocketRadius = 7.5
+    heltecSocketHeight = 2.0
+    hsx = heltecX + (heltecOverallWidth / 2.0)-1.5 # minus wall_width/2.0
+    hsy =box_inner_depth
+    hsz = heltecSocketHeight
+    plugHole = Part.makeCylinder(heltecSocketRadius,box_thickness,Base.Vector(hsx, hsy, hsz),Base.Vector(0,1,0))
+    box_top = box_top.cut(plugHole)      
+#
+# Now make the holes for the buttons
+#
+    button_indent = 5.0
+    button_plinth_height = 1.0
+    button_hole_radius = 3.0
+    button_vert_spacing = 10.0
+    button_horiz_spacing = 15.0
+    button_plinth_width = button_vert_spacing + 4*button_hole_radius + 2 * button_indent
+    button_plinth_depth = button_horiz_spacing + 4*button_hole_radius + 2 * button_indent
+    button_plinth_pos = Base.Vector(0,0,box_thickness-button_plinth_height)
+    button_plinth = Part.makeBox(button_plinth_width,button_plinth_depth,button_plinth_height,button_plinth_pos)
+    shx = button_hole_radius + button_indent
+    shy = button_hole_radius + button_indent
+    syz = box_thickness-button_plinth_height
+    print "Up Button X:", (shx+heltecX-heltecOverallWidth-5-box_thickness)/10.0
+    print "Up Button Y:", (shy+heltecY-5-box_thickness)/10.0
+    print "Up Button radius:", button_hole_radius/10.0
+    switchHole = Part.makeCylinder(button_hole_radius,box_thickness-button_plinth_height,Base.Vector(shx,shy,syz),Base.Vector(0,0,-1))
+    button_plinth = button_plinth.fuse(switchHole)
+    shx = shx+button_vert_spacing+button_hole_radius
+    switchHole = Part.makeCylinder(button_hole_radius,box_thickness-button_plinth_height,Base.Vector(shx,shy,syz),Base.Vector(0,0,-1))
+    print "Down Button X:", (shx+heltecX-heltecOverallWidth-5-box_thickness)/10.0
+    print "Down Button Y:", (shy+heltecY-5-box_thickness)/10.0
+    print "Down Button radius:", button_hole_radius/10.0
+    button_plinth = button_plinth.fuse(switchHole)
+    shx = shx-(button_vert_spacing/2.0)-(button_hole_radius/2.0)
+    shy = shy+(button_horiz_spacing)+button_hole_radius
+    print "Enter Button X:", (shx+heltecX-heltecOverallWidth-5-box_thickness)/10.0
+    print "Enter Button Y:", (shy+heltecY+5-box_thickness)/10.0
+    print "Enter Button radius:", button_hole_radius/10.0
+    switchHole = Part.makeCylinder(button_hole_radius,box_thickness-button_plinth_height,Base.Vector(shx,shy,syz),Base.Vector(0,0,-1))
+    button_plinth = button_plinth.fuse(switchHole)
+    button_plinth.translate(Base.Vector(heltecX-heltecOverallWidth-5,heltecY+5,0))
+    box_top = box_top.cut(button_plinth)
+#
+# Cut the hole for the Lora Antenna
+#
+    antennaHoleRadius = 3.5
+    antennaHoleX = 50.0
+    antennaHoleY = 16.0
+    print "Antenna X:", (antennaHoleX-box_thickness)/10.0
+    print "Antenna Y:", (antennaHoleY-box_thickness)/10.0
+    print "Antenna radius:", antennaHoleRadius/10.0
+    antennaHole = Part.makeCylinder(antennaHoleRadius,box_thickness,Base.Vector(antennaHoleX, antennaHoleY, 0),Base.Vector(0,0,1))
+    box_top = box_top.cut(antennaHole)
+#
+#
+#  Finally add two pillars to mount the RTC
+#
+    RTC_hole_spacing = 18.0
+    RTC_pillar_height = 10.0
+    RTC_pillar_radius = 3.0
+    RTC_hole_radius = 1.2
+    RTC_hole_depth = 5.0
+    RTCx = 18.0
+    RTCy = 8.0
+    RTCz = box_thickness
+    rtcPillar = Part.makeCylinder(RTC_pillar_radius,RTC_pillar_height,Base.Vector(RTCx, RTCy, RTCz),Base.Vector(0,0,1))
+    box_top = box_top.fuse(rtcPillar)      
+    rtcPillar = Part.makeCylinder(RTC_hole_radius,RTC_hole_depth,Base.Vector(RTCx, RTCy, RTCz+RTC_pillar_height-RTC_hole_depth),Base.Vector(0,0,1))
+    box_top = box_top.cut(rtcPillar)      
+    RTCy = RTCy + RTC_hole_spacing
+    rtcPillar = Part.makeCylinder(RTC_pillar_radius,RTC_pillar_height,Base.Vector(RTCx, RTCy, RTCz),Base.Vector(0,0,1))
+    box_top = box_top.fuse(rtcPillar)      
+    rtcPillar = Part.makeCylinder(RTC_hole_radius,RTC_hole_depth,Base.Vector(RTCx, RTCy, RTCz+RTC_pillar_height-RTC_hole_depth),Base.Vector(0,0,1))
+    box_top = box_top.cut(rtcPillar)      
+
+    return (("sensorBottom",box_bottom),("sensorTop",box_top),("sensorClamp", clamp))
+
+namePrefix="C:/Users/Rob/OneDrive/Dust Sensor/"
+panel=controlPanel()
+count=0
+for item in panel:
+    item[1].exportStl(namePrefix + item[0]+".stl")
+    item[1].translate(Base.Vector(count*200,0,0))
+    Part.show(item[1])
+    count=count+1
+    
+Gui.SendMsgToActiveView("ViewFit")
+Gui.activeDocument().activeView().viewAxometric()

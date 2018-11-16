@@ -1,0 +1,5 @@
+{
+    "board": "heltec:esp32:wifi_lora_32",
+    "configuration": "FlashFreq=80,UploadSpeed=921600",
+    "port": "COM3"
+}

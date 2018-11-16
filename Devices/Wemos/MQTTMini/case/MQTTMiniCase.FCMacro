@@ -1,0 +1,210 @@
+# Version 1.0
+# Makes a box for the Wemos, ZPH01 sensor and pixel ring
+# Runs inside Freecad. 
+# Uses absolute paths to write the output files. You might want to change these.
+# Rob Miles November 2018
+
+import Mesh
+import Part
+from FreeCAD import Base
+import sys
+
+import math
+import random
+
+namePrefix="C:/Users/Rob/OneDrive/Dust Sensor/"
+
+holderWidth = 85.0
+holderDepth = 60.0
+holderGap = 0.5
+holderThickness = 3.0
+maskThickness = 1.0
+sensorHoleRadius = 2.0
+
+def MakeHoles(part,holes):
+    for hole in holes:
+        holeCut = Part.makeCylinder(hole[3],hole[4],Base.Vector(hole[0],hole[1],hole[2]))
+        part = part.cut(holeCut)
+    return part
+
+def WemosPlugHole():
+    plugHole = Part.makeCylinder(7.5,10,Base.Vector(0, 0, 0),Base.Vector(0,1,0),180)
+    plugHole.rotate(Base.Vector(0,0,0),Base.Vector(0,1,0),-90)
+    plugHole.translate(Base.Vector(13.25,0,0))
+    return plugHole
+
+def WemosProc():
+    top=Part.makeBox(12.5,16.0,2.0, Base.Vector(7.4,11.7,-4.0))
+    skirt=Part.makeBox(19.0,27.0,1.0, Base.Vector(4.0,8,-2.0))
+    pcb=Part.makeBox(26.5,35.0,1.0, Base.Vector(0,0,-1.0))
+    wemos = skirt.fuse(top)
+    wemos = wemos.fuse(pcb)
+    pins=Part.makeBox(4,25.5,5.0, Base.Vector(0,5.0,-6.0))
+    wemos = wemos.fuse(pins)
+    pins=Part.makeBox(4,25.5,5.0, Base.Vector(22.5,5.0,-6.0))
+    wemos = wemos.fuse(pins)
+    return wemos
+
+def PixelRing():
+    outerRing = Part.makeCylinder(25.5,2)
+    innerRing = Part.makeCylinder(16.0,2)
+    ring = outerRing.cut(innerRing)
+    ring.translate(Base.Vector(25.5,25.5,-2))
+    return ring
+
+def PixelHoles():
+    ledsIn12=[1,2,3,4,5,6,7,8,9,10,11,12]
+    pixelHoleRadius=3.0
+    pixelHoleHeight=10.0
+    ledHole=Part.makeCylinder(pixelHoleRadius,pixelHoleHeight,Base.Vector(0,0,0))
+    ledHole.translate(Base.Vector(20.75,0,0))
+    resultHoles = ledHole
+    for holePos in ledsIn12:
+        rotation=(holePos/12.0)* 360
+        ledHole.rotate(Base.Vector(0,0,0),Base.Vector(0,0,1),rotation)
+        resultHoles = resultHoles.fuse(ledHole)
+        ledHole.rotate(Base.Vector(0,0,0),Base.Vector(0,0,1),-rotation)
+    resultHoles.translate(Base.Vector(25.5,25.5,-2))
+    return resultHoles
+
+def PlaceAtOrigin(item):
+    bounds = item.BoundBox
+    item.translate(Base.Vector(-bounds.XMin,-bounds.YMin, -bounds.ZMin))
+
+def MakeParts():
+    holder=Part.makeBox(holderWidth,holderDepth,holderThickness)
+    holes = ((60.0,28.5,0.0,sensorHoleRadius, holderThickness),
+             (60.0,45.0,0.0,5.0, holderThickness),
+             (10.0,45.0,0.0,5.0, holderThickness))
+    holder = MakeHoles(holder, holes)
+    wemos = WemosProc()
+    wemos.translate(Base.Vector(5,0,holderThickness))
+    holder =  holder.cut(wemos)
+#
+    ring = PixelRing()
+    ringYOffset = (holderDepth-51)/2.0
+    ringXOffset = (holderWidth-51)-2.0
+    
+    ring.translate(Base.Vector(ringXOffset,ringYOffset,holderThickness))
+    holder=holder.cut(ring)
+#
+    mask=Part.makeBox(holderWidth,holderDepth,maskThickness)
+    holes = PixelHoles()
+    holes.translate(Base.Vector(ringXOffset,ringYOffset,0))
+    mask=mask.cut(holes)
+#    
+#
+#
+    box_screw_hole_radius=1.2
+    box_fillet_radius=3.0
+    box_screw_hole_inset=20.0
+    box_inset_height=10.0
+    box_thickness = 3.0
+    box_inner_width=holderWidth+(2*holderGap)
+    box_inner_depth=holderDepth+(2*holderGap)
+    box_inner_height=30.0
+    box_width=box_inner_width+(2*box_thickness)
+    box_depth=box_inner_depth+(2*box_thickness)
+    box_height = box_inner_height+(2*box_thickness)
+    box=Part.makeBox(box_width,box_depth,box_height,Base.Vector(-box_thickness,-box_thickness,0))
+#
+#   fillet the edges
+#
+#    box=box.makeFillet(box_fillet_radius,box.Edges)
+#
+    box_base_height=box_height/2.0
+#
+# Now drill fitting holes for the base
+#
+    fitting_hole=Part.makeCylinder(box_screw_hole_radius,box_depth,Base.Vector(box_screw_hole_inset,-box_thickness,box_thickness+box_base_height-(box_inset_height/2.0)-(box_screw_hole_radius/2.0)),Base.Vector(0,1,0))
+    box=box.cut(fitting_hole)
+#
+# Move to cut the second hole
+    fitting_hole.translate(Base.Vector(box_inner_width-(2*box_screw_hole_inset),0,0))
+    box=box.cut(fitting_hole)
+#
+# Now hollow out the box
+#
+    box_void=Part.makeBox(box_inner_width,box_inner_depth,box_inner_height,Base.Vector(0,0,box_thickness))
+    box=box.cut(box_void)
+#
+# Now cut the led hole
+#
+#    cable_hole=Part.makeCylinder(box_cable_hole_radius,box_thickness,Base.Vector(-box_thickness,box_inner_depth/2.0,panel_thickness+box_height-box_cable_hole_height),Base.Vector(1,0,0))
+#    box=box.cut(cable_hole)
+
+#
+#
+# Cut off the bottom of the box to make the top part
+#
+    box_top_cut=Part.makeBox(box_width,box_depth,box_base_height+box_thickness,Base.Vector(-box_thickness,-box_thickness,box_height-box_base_height+box_thickness))
+    box_top=box.cut(box_top_cut)
+#
+# Cut out the overlap for the inset
+#
+    box_inset_cut=Part.makeBox(box_inner_width+box_thickness,box_inner_depth+box_thickness,box_inset_height,Base.Vector(-box_thickness/2.0,-box_thickness/2.0,box_height-box_base_height+box_thickness-box_inset_height))
+    box_top=box_top.cut(box_inset_cut)
+#
+# cut the vents
+#
+    minventHoleRadius = 0.5
+    maxventHoleRadius = 1.5
+    noOfVentRows = 12
+    noOfVentCols = 18
+    random.seed(1)
+    ventHoleXSpacing = box_inner_width/noOfVentRows
+    ventHoleYSpacing = box_inner_depth/noOfVentCols
+
+    ventHoleX = ventHoleXSpacing/2.0
+    ventHoleY = ventHoleYSpacing/2.0
+    ventHoleZ = 0.0
+    dotNum = 0
+    for rowCount in range(0,noOfVentRows):
+        vx = ventHoleX + (rowCount*ventHoleXSpacing)
+        for colCount in range(0,noOfVentCols):
+            vy = ventHoleY + (ventHoleYSpacing*colCount)
+#            ventHoleRadius = minventHoleRadius + (random.random()*(maxventHoleRadius-minventHoleRadius))
+            if random.random()>0.5:
+                ventHoleRadius = maxventHoleRadius
+            else:
+                ventHoleRadius = minventHoleRadius
+#           ventHoleRadius = minventHoleRadius + (math.fabs(math.sin(dotNum))*(maxventHoleRadius-minventHoleRadius))
+            ventHole = Part.makeCylinder(ventHoleRadius,box_thickness,Base.Vector(vx, vy, 0))
+            box_top=box_top.cut(ventHole)
+            dotNum = dotNum + 0.1
+#
+# Now make the base of the box
+#
+# Cut off the bottom portion
+    box_bottom_cut=Part.makeBox(box_width,box_depth,box_base_height+box_thickness-box_inset_height,Base.Vector(-box_thickness,-box_thickness,0))
+    box_bottom=box.cut(box_bottom_cut)
+#
+# Now cut off the top to create the lip for the overlap
+#
+    box_bottom=box_bottom.cut(box_top)
+#
+# Rotate the bottom for printing
+    box_bottom.rotate(Base.Vector(box_width/2.0,box_depth/2.0,(box_height)/2.0),Base.Vector(0,1,0),180)
+    PlaceAtOrigin(box_bottom)
+    plug = WemosPlugHole()
+    plug.translate(Base.Vector(9.0,box_inner_depth, box_thickness))
+    box_bottom = box_bottom.cut(plug)
+
+#    wemos.rotate(Base.Vector(0,0,0),Base.Vector(0,0,1),180)
+    testPlate = Part.makeBox(30,40,3,Base.Vector(-2.0,0,-3.0))
+    testPlate = testPlate.cut(wemos)
+
+    return (("holder",holder),("top",box_top),("bottom", box_bottom),("wemos", wemos), ("testplate", testPlate),("pixelring", ring),("mask", mask))
+
+panel=MakeParts()
+count=0
+for item in panel:
+    item[1].exportStl(namePrefix + item[0]+".stl")
+    PlaceAtOrigin(item[1])
+    item[1].translate(Base.Vector(count*100,0,0))
+    Part.show(item[1])
+    count=count+1
+    
+Gui.SendMsgToActiveView("ViewFit")
+Gui.activeDocument().activeView().viewAxometric()
+

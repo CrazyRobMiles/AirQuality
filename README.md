@@ -1,6 +1,6 @@
 # AirQuality Resources
 
-![Both Air Quality Sensors](Images/Sensor-1.jpg "The two sensors")
+![Both Air Quality Sensors](Images/Sensor-1.jpg?raw=true "The two sensors")
 
 
 Here you can find the code for two Air Quality sensor designs along with a work-in-progress configuration tool.

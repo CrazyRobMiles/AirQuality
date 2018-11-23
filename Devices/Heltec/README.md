@@ -1,6 +1,6 @@
 # Heltec Sensor with full User Interface
 
-![Sensor 01 Assembly](Images/Sensor01Construction.png "Sensor 01 Printed components")
+![Sensor 01 Assembly](Images/Sensor01Construction.png?raw=true "Sensor 01 Printed components")
 
 The code runs on a Heltec LoRa 32 device which has an OLED display. The connections are described in the document "Heltec Connections" in this folder. 
 

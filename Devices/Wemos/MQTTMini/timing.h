@@ -1,7 +1,11 @@
 #pragma once
-#include "mqtt.h"
-#include "PixelControl.h"
-#include "utils.h"
+
+// from PixelControl.h
+void updateReadingDisplay(float reading);
+
+// from mqtt.h
+boolean send_to_mqtt();
+
 
 unsigned long mqtt_reading_retry_interval_in_millis;
 unsigned long mqtt_reading_interval_in_millis;

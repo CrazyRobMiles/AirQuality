@@ -1,6 +1,8 @@
 # Air Quality Sensors
 
+
 There is code for two devies. It is based on a similar structure. 
+
 
 The Heltec configuration uses a Heltec LoRa 32 processor, an SDS011 sensor, a BME280 environmental sensor a DS3231 real time clock and a NMEA compatible GPS sensor. It has a menu driven interface and can upload readings using MQTT or LoRa. 
 

@@ -125,8 +125,8 @@ void setup_mqtt()
 
 void mqtt_connect_failed()
 {
-	TRACELN("MQTT failed with state ");
-	Serial.print(client.state());
+	TRACE("MQTT failed with state: ");
+	TRACELN(client.state());
 	mqtt_timer_start = millis();
 	update_action(settings.mqttName, "Connect Failed");
 	mqttState = ShowingConnectToMQTTServerFailed;

@@ -98,9 +98,6 @@ void readings_ready()
 
 		if (millis_since_last_lora_update > lora_reading_interval_in_millis)
 		{
-			Serial.println(millis_since_last_lora_update);
-			Serial.println(lora_reading_interval_in_millis);
-			Serial.println("Do the update");
 			milliseconds_at_last_lora_update = time_in_millis ;
 			send_to_lora();
 		}

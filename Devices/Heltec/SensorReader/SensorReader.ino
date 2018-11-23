@@ -12,9 +12,8 @@
 #include <lmic.h>
 #include "ArduinoJson-v5.13.2.h"
 
-//#define VERBOSE
 #include "HeltecMD_DS3231.h"
-#define DEBUG
+//#define DEBUG
 //#define SECURE_SOCKETS
 
 #ifdef DEBUG

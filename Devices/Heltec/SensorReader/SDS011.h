@@ -23,17 +23,15 @@ int message_pos = 0;
 
 void message_error(String message)
 {
-	Serial.println(message);
+	TRACELN(message);
 }
 
 void process_readings(float ppm25, float ppm10)
 {
-#ifdef VERBOSE
-	Serial.print("PPM 2.5:");
-	Serial.println(ppm25);
-	Serial.print("PPM 10:");
-	Serial.println(ppm10);
-#endif
+	TRACE("PPM 2.5:");
+	TRACELN(ppm25);
+	TRACE("PPM 10:");
+	TRACELN(ppm10);
 
 	// Only update the reading value if we are processing
 
@@ -53,11 +51,11 @@ void process_report_status(bool active_mode)
 {
 	if (active_mode)
 	{
-		Serial.println("Sensor in active mode");
+		TRACELN("Sensor in active mode");
 	}
 	else
 	{
-		Serial.println("Sensor in query mode");
+		TRACELN("Sensor in query mode");
 	}
 }
 
@@ -65,30 +63,24 @@ void dump_reading()
 {
 	for (int i = 0; i < message_pos; i++)
 	{
-		Serial.print(message_text[i], HEX);
-		Serial.print(" ");
+		TRACE_HEX(message_text[i]);
+		TRACE(" ");
 	}
-	Serial.println();
+	TRACELN();
 }
 
 uint8_t get_checksum(uint8_t * byte_buffer, int byte_buffer_length)
 {
 	uint8_t check_sum = 0;
 
-#ifdef VERBOSE
-	Serial.print("Check:");
-#endif
+	TRACE("Check:");
 	for (int i = 2; i < byte_buffer_length; i++)
 	{
-#ifdef VERBOSE
-		Serial.print(byte_buffer[i], HEX);
-		Serial.print(" ");
-#endif
+		TRACE_HEX(byte_buffer[i]);
+		TRACE(" ");
 		check_sum = check_sum + byte_buffer[i];
 	}
-#ifdef VERBOSE
-	Serial.println();
-#endif
+	TRACELN();
 	return check_sum;
 }
 
@@ -98,22 +90,18 @@ bool check_checksum()
 
 	uint8_t check_sum = get_checksum(message_text, checksum_pos);
 
-#ifdef VERBOSE
-	Serial.print("Checksum:");
-	Serial.println(check_sum, HEX);
-	Serial.print("Received Checksum:");
-	Serial.println(message_text[checksum_pos], HEX);
-#endif
+	TRACE("Checksum:");
+	TRACE_HEXLN(check_sum);
+	TRACE("Received Checksum:");
+	TRACE_HEXLN(message_text[checksum_pos]);
 
 	return check_sum == message_text[checksum_pos];
 }
 
 void process_reading()
 {
-#ifdef VERBOSE
-	Serial.println("Process reading");
+	TRACELN("Process reading");
 	dump_reading();
-#endif
 
 	if (!check_checksum())
 	{
@@ -136,44 +124,36 @@ void process_set_device_ID(uint8_t ID1, uint8_t ID2)
 
 void process_set_device_work(bool working)
 {
-#ifdef VERBOSE
-	Serial.println("Process set device work");
-#endif
+	TRACELN("Process set device work");
 	if (working)
-		Serial.println("Device is working");
+		TRACELN("Device is working");
 	else
-		Serial.println("Device is asleep");
+		TRACELN("Device is asleep");
 }
 
 void process_query_device_work(bool working)
 {
-#ifdef VERBOSE
-	Serial.println("Process query device work");
-#endif
+	TRACELN("Process query device work");
 	if (working)
-		Serial.println("Device is working");
+		TRACELN("Device is working");
 	else
-		Serial.println("Device is asleep");
+		TRACELN("Device is asleep");
 }
 
 
 void process_reporting_mode(bool active)
 {
-#ifdef VERBOSE
-	Serial.println("Process reporting mode");
-#endif
+	TRACELN("Process reporting mode");
 	if (active)
-		Serial.println("Device is in active mode");
+		TRACELN("Device is in active mode");
 	else
-		Serial.println("Device is query mode");
+		TRACELN("Device is query mode");
 }
 
 void process_device_messages()
 {
-#ifdef VERBOSE
-	Serial.println("Processing device message");
+	TRACELN("Processing device message");
 	dump_reading();
-#endif
 
 	if (!check_checksum())
 	{
@@ -221,9 +201,7 @@ void reset_message()
 
 void begin_loading_command()
 {
-#ifdef VERBOSE
-	Serial.println("Beginning loading command");
-#endif
+	TRACELN("Beginning loading command");
 	// Store the message start in the block
 	buffer_byte(MESSAGE_START);
 	state = waiting_for_command;
@@ -231,9 +209,7 @@ void begin_loading_command()
 
 void begin_loading_reading()
 {
-#ifdef VERBOSE
-	Serial.println("Beginning loading reading");
-#endif
+	TRACELN("Beginning loading reading");
 	buffer_byte(READING_COMMAND);
 	state = loading_reading;
 }
@@ -246,10 +222,8 @@ void begin_loading_reporting_mode()
 
 void pump_byte(uint8_t b)
 {
-#ifdef VERBOSE
-	Serial.print("Pumping byte:");
-	Serial.println(b, HEX);
-#endif
+	TRACE("Pumping byte:");
+	TRACE_HEXLN(b);
 
 	switch (state)
 	{
@@ -326,26 +300,25 @@ void send_block(uint8_t * block_base, int block_length)
 {
 	int checksum_pos = block_length - 2;
 	uint8_t checksum = get_checksum(reporting_mode_command, checksum_pos);
-#ifdef VERBOSE
-	Serial.print("Calculated checksum:");
-	Serial.println(checksum, HEX);
-#endif
+
+	TRACE("Calculated checksum:");
+	TRACE_HEX(checksum);
+
 	reporting_mode_command[checksum_pos] = checksum;
 	for (int i = 0; i < block_length; i++)
 	{
-#ifdef VERBOSE
-		Serial.print("Writing byte:");
-		Serial.println(reporting_mode_command[i], HEX);
-#endif
+
+		TRACE("Writing byte:");
+		TRACE_HEXLN(reporting_mode_command[i]);
+
 		MySerial.write(reporting_mode_command[i]);
-}
+	}
 }
 
 void get_reporting_mode()
 {
-#ifdef VERBOSE
-	Serial.println("Getting reporting mode");
-#endif
+	TRACELN("Getting reporting mode");
+
 	// select the command to query the reporting mode
 	reporting_mode_command[1] = 0xB4;
 	reporting_mode_command[2] = 2;
@@ -355,9 +328,7 @@ void get_reporting_mode()
 
 void get_working_mode()
 {
-#ifdef VERBOSE
-	Serial.println("Getting working mode");
-#endif
+	TRACELN("Getting working mode");
 	// select the command to query the reporting mode
 	reporting_mode_command[1] = 0xB4;
 	reporting_mode_command[2] = 6;
@@ -369,12 +340,10 @@ void get_working_mode()
 void set_reporting_mode(bool set_active_mode)
 {
 
-#ifdef VERBOSE
 	if (set_active_mode)
-		Serial.println("Setting active reporting mode");
+		TRACELN("Setting active reporting mode");
 	else
-		Serial.println("Setting query reporting mode");
-#endif
+		TRACELN("Setting query reporting mode");
 
 	// select the command to set the reporting mode
 	reporting_mode_command[1] = 0xB4;
@@ -389,9 +358,8 @@ void set_reporting_mode(bool set_active_mode)
 
 void query_sensor()
 {
-#ifdef VERBOSE
-	Serial.println("Query the sensor");
-#endif
+	TRACELN("Query the sensor");
+
 	reporting_mode_command[1] = 0xB4;
 	reporting_mode_command[2] = 4;
 	reporting_mode_command[3] = 0;
@@ -400,12 +368,11 @@ void query_sensor()
 
 void set_sensor_working(bool working)
 {
-#ifdef VERBOSE
 	if (working)
-		Serial.println("Setting sensor working");
+		TRACELN("Setting sensor working");
 	else
-		Serial.println("Setting sensor asleep");
-#endif
+		TRACELN("Setting sensor asleep");
+
 	reporting_mode_command[1] = 0xB4;
 	reporting_mode_command[2] = 6;
 	reporting_mode_command[3] = 1;
@@ -418,9 +385,8 @@ void set_sensor_working(bool working)
 
 void setup_sensor()
 {
-#ifdef VERBOSE
-	Serial.println("Setting up Sensor");
-#endif
+	TRACELN("Setting up Sensor");
+
 	MySerial.begin(9600, SERIAL_8N1, 17, -1);  // badud, mode, rx, tx
 	reset_message();
 	pub_air_values_ready = false;

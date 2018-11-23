@@ -16,9 +16,9 @@ void ppsHandler(void)
 // stop these from being transmitted
 void printUnknownSentence(const MicroNMEA& nmea)
 {
-//	Serial.println();
-//	Serial.print("Unknown sentence: ");
-//	Serial.println(nmea.getSentence());
+//	TRACELN();
+//	TRACE("Unknown sentence: ");
+//	TRACELN(nmea.getSentence());
 }
 
 

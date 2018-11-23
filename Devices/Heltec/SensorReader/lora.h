@@ -146,11 +146,13 @@ void onEvent(ev_t ev)
         // data received in rx slot after tx
         // if any data received, a LED will blink
         // this number of times, with a maximum of 10
-        Serial.print(F("Data Received: "));
+        TRACELN(F("Data Received: "));
 			for(int i=0; i<LMIC.dataLen; i++)
 			{
-				Serial.println(LMIC.frame[LMIC.dataBeg+i],HEX);
+				TRACE_HEX(LMIC.frame[LMIC.dataBeg+i]);
+				TRACE(" ");
 			}
+			TRACELN();
 		}
 		DEBUG_PRINTLN("EV_TXCOMPLETE (includes waiting for RX windows)");
 		OK_to_send = true;

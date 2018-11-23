@@ -1,13 +1,4 @@
 #pragma once
-#include "WiFiConnection.h"
-
-char * dayNames[] = { "", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-
-char * monthNames[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-
-enum ClockState { CLockAwaitingWiFi, ClockAwaitingSync, ClockRunning};
-
-ClockState clockState;
 
 #define NTP_PACKET_SIZE			48
 #define NTP_LOCAL_PORT			4242

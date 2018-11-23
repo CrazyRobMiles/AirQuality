@@ -43,31 +43,29 @@ void setup_bme280()
 
 	pub_bme_values_ready = false;
 
-#ifdef VERBOSE
-	Serial.println("Done setting up BME 280");
-#endif
+	TRACELN("Done setting up BME 280");
 }
 
 
 void printBMEValues() {
-	Serial.print("Temperature = ");
-	Serial.print(bme.readTemperature());
-	Serial.println(" *C");
+	TRACE("Temperature = ");
+	TRACE(bme.readTemperature());
+	TRACELN(" *C");
 
-	Serial.print("Pressure = ");
+	TRACE("Pressure = ");
 
-	Serial.print(bme.readPressure() / 100.0F);
-	Serial.println(" hPa");
+	TRACE(bme.readPressure() / 100.0F);
+	TRACELN(" hPa");
 
-	Serial.print("Approx. Altitude = ");
-	Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
-	Serial.println(" m");
+	TRACE("Approx. Altitude = ");
+	TRACE(bme.readAltitude(SEALEVELPRESSURE_HPA));
+	TRACELN(" m");
 
-	Serial.print("Humidity = ");
-	Serial.print(bme.readHumidity());
-	Serial.println(" %");
+	TRACE("Humidity = ");
+	TRACE(bme.readHumidity());
+	TRACELN(" %");
 
-	Serial.println();
+	TRACELN();
 }
 
 void loop_bme280() 

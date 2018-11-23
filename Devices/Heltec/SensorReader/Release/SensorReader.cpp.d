@@ -163,7 +163,7 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\SensorReader\heltec_wifi_kit_32_esp32\R
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32/tools/sdk/include/spi_flash/esp_partition.h \
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32/tools/sdk/include/spi_flash/esp_spi_flash.h \
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32\cores\esp32/base64.h \
- C:\Users\Rob\Documents\Arduino\libraries\pubsubclient\src/PubSubClient.h \
+ C:\Users\Rob\Documents\Arduino\libraries\PubSubClient\src/PubSubClient.h \
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32\cores\esp32/Client.h \
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32\libraries\WiFi\src/WiFi.h \
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32\cores\esp32/Print.h \

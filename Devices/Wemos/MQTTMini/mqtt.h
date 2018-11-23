@@ -2,13 +2,7 @@
 
 #define MQTT_DISPLAY_TIMEOUT 3000
 
-#include "utils.h"
-
 unsigned long mqtt_timer_start;
-
-enum MQTTState { AwaitingWiFi, ConnectingToMQTTServer, ShowingConnectedToMQTTServer, ShowingConnectToMQTTServerFailed, ConnectedToMQTTServer, ConnectToMQTTServerFailed };
-
-MQTTState mqttState;
 
 #ifdef SECURE_SOCKETS
 WiFiClientSecure espClient;

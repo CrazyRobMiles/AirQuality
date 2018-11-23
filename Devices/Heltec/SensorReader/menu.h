@@ -412,6 +412,14 @@ void end_action()
 	menuState = stateBeforeAction;
 }
 
+void error_stop(String title, String text)
+{
+	start_action(title, text);
+	loop_lcd();
+	while (true)
+		delay(1);
+}
+
 void menu_up_pressed()
 {
 	switch (menuState)

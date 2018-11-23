@@ -1521,7 +1521,6 @@ void reset_serial_buffer()
 
 void act_on_serial_command()
 {
-	Serial.println("Got a serial command");
 	act_onJson_command(serial_receive_buffer, serial_deliver_command_result);
 }
 
@@ -1574,11 +1573,13 @@ void check_serial_buffer()
 	}
 }
 
+void error_stop(String title, String text);
+
 void setup_commands()
 {
 	if (!EEPROM.begin(EEPROM_SIZE))
 	{
-		Serial.println("failed to initialise EEPROM"); delay(100);
+		error_stop("Failure", "EEPROM faulty");
 	}
 
 	load_settings();

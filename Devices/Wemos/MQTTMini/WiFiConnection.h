@@ -1,10 +1,9 @@
 #pragma once
-#include "commands.h"
-#include "menu.h"
 
-enum WiFiState { WiFiOff, WiFiStarting, WiFiScanning, WiFiConnecting, WiFiConnected, ShowingWifiConnected, WiFiConnectFailed, WiFiNotConnected };
-
-WiFiState wifiState;
+// from menu.h
+void start_action(String title, String text);
+void update_action(String title, String text);
+void end_action();
 
 // timeout in millis
 #define WIFI_START_TIMEOUT 20000

@@ -409,7 +409,7 @@ class NodeConfig(object):
         Grid.rowconfigure(self.root, 0, weight=1)
         Grid.columnconfigure(self.root, 0, weight=1)
 
-        self.root.title("HullOS Network Configuration 1.0 Rob Miles")
+        self.root.title("Sensor Configuration 1.0 Rob Miles")
 
         self.serial_port = None
         self.last_working_port = None

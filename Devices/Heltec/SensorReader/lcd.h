@@ -17,37 +17,37 @@
 
 SSD1306  display(0x3c, 4, 15, 16);
 
-OLEDDisplayUi ui     ( &display );
+OLEDDisplayUi ui(&display);
 
 void clockOverlay(OLEDDisplay *display, OLEDDisplayUiState* state) {
-  display->setTextAlignment(TEXT_ALIGN_RIGHT);
-  char time_buffer[100];
-  sprintf(time_buffer, "%02d:%02d", pub_hour, pub_minute);
-  display->setFont(ArialMT_Plain_10);
-  display->drawString(128, 0, time_buffer);
+	display->setTextAlignment(TEXT_ALIGN_RIGHT);
+	char time_buffer[100];
+	sprintf(time_buffer, "%02d:%02d", pub_hour, pub_minute);
+	display->setFont(ArialMT_Plain_10);
+	display->drawString(128, 0, time_buffer);
 }
 
 void drawSplashScreen(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
-  display->setTextAlignment(TEXT_ALIGN_CENTER);
+	display->setTextAlignment(TEXT_ALIGN_CENTER);
 
-  display->setFont(ArialMT_Plain_16);
-  display->drawString(64 + x, 10 + y,settings.splash_screen_top_line);
+	display->setFont(ArialMT_Plain_16);
+	display->drawString(64 + x, 10 + y, settings.splash_screen_top_line);
 
-  display->setFont(ArialMT_Plain_16);
-  display->drawString(64 + x, 30 + y, settings.splash_screen_bottom_line);
+	display->setFont(ArialMT_Plain_16);
+	display->drawString(64 + x, 30 + y, settings.splash_screen_bottom_line);
 }
 
 void drawAirQuality(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
-  char number_buffer [100];
-  
-  display->setTextAlignment(TEXT_ALIGN_LEFT);
+	char number_buffer[100];
 
-  display->setFont(ArialMT_Plain_16);
-  sprintf(number_buffer, "PM10:  %.1f", pub_ppm_10); 
-  display->drawString(0 + x, 10 + y, number_buffer);
+	display->setTextAlignment(TEXT_ALIGN_LEFT);
 
-  sprintf(number_buffer, "PPM25:  %.1f", pub_ppm_25); 
-  display->drawString(0 + x, 30 + y, number_buffer);
+	display->setFont(ArialMT_Plain_16);
+	sprintf(number_buffer, "PM10:  %.1f", pub_ppm_10);
+	display->drawString(0 + x, 10 + y, number_buffer);
+
+	sprintf(number_buffer, "PPM25:  %.1f", pub_ppm_25);
+	display->drawString(0 + x, 30 + y, number_buffer);
 
 }
 
@@ -69,12 +69,12 @@ void drawTemp(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int16_
 }
 
 void drawFrame4(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
-  // Demo for drawStringMaxWidth:
-  // with the third parameter you can define the width after which words will be wrapped.
-  // Currently only spaces and "-" are allowed for wrapping
-  display->setTextAlignment(TEXT_ALIGN_LEFT);
-  display->setFont(ArialMT_Plain_10);
-  display->drawStringMaxWidth(0 + x, 10 + y, 128, "Lorem ipsum\n dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore.");
+	// Demo for drawStringMaxWidth:
+	// with the third parameter you can define the width after which words will be wrapped.
+	// Currently only spaces and "-" are allowed for wrapping
+	display->setTextAlignment(TEXT_ALIGN_LEFT);
+	display->setFont(ArialMT_Plain_10);
+	display->drawStringMaxWidth(0 + x, 10 + y, 128, "Lorem ipsum\n dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore.");
 }
 
 void drawFrame5(OLEDDisplay *display, OLEDDisplayUiState* state, int16_t x, int16_t y) {
@@ -184,10 +184,10 @@ void set_working_display()
 	ui.setFrameAnimation(SLIDE_LEFT);
 
 	// Add frames
-	if((settings.splash_screen_bottom_line[0]==0) && (settings.splash_screen_top_line[0]==0))
+	if ((settings.splash_screen_bottom_line[0] == 0) && (settings.splash_screen_top_line[0] == 0))
 	{
 		// If the splash screen text is empty - don't display the splash screen
-		ui.setFrames(workingFramesNoSplash, workingFrameCount-1);
+		ui.setFrames(workingFramesNoSplash, workingFrameCount - 1);
 	}
 	else
 	{
@@ -341,7 +341,7 @@ void set_number_input_display(String in_number_input_prompt, int in_number_being
 	activate_number_input_display();
 }
 
-FrameCallback menuFrames[] = {drawMenuFrame};
+FrameCallback menuFrames[] = { drawMenuFrame };
 
 // how many frames are there?
 int menuFrameCount = 1;
@@ -401,31 +401,29 @@ int get_selected_item()
 }
 
 void setup_lcd() {
- #ifdef VERBOSE
- Serial.println("Setting up LCD");
- #endif
-  
-  // The ESP is capable of rendering 60fps in 80Mhz mode
-  // but that won't give you much time for anything else
-  // run it in 160Mhz mode or just set it to 30 fps
-  ui.setTargetFPS(60);
+	TRACELN("Setting up LCD");
 
-  set_working_display();
+	// The ESP is capable of rendering 60fps in 80Mhz mode
+	// but that won't give you much time for anything else
+	// run it in 160Mhz mode or just set it to 30 fps
+	ui.setTargetFPS(60);
 
-  // Initialising the UI will init the display too.
-  ui.init();
+	set_working_display();
 
-  //display.flipScreenVertically();
+	// Initialising the UI will init the display too.
+	ui.init();
+
+	//display.flipScreenVertically();
 
 }
 
 void loop_lcd() {
-  int remainingTimeBudget = ui.update();
+	int remainingTimeBudget = ui.update();
 
-  if (remainingTimeBudget > 0) {
-    // You can do some work here
-    // Don't do stuff if you are below your
-    // time budget.
-    delay(remainingTimeBudget);
-  }
+	if (remainingTimeBudget > 0) {
+		// You can do some work here
+		// Don't do stuff if you are below your
+		// time budget.
+		delay(remainingTimeBudget);
+	}
 }

@@ -103,6 +103,23 @@ static void initfunc(osjob_t* j) {
 	}
 }
 
+void lora_deliver_command_result(char * result)
+{
+	if (LMIC.opmode & OP_TXRXPEND) {
+		DEBUG_PRINTLN("OP_TXRXPEND, not sending");
+	}
+	else {
+		// Prepare upstream data transmission at the next possible time.
+		LMIC_setTxData2(1, (uint8_t*)result, strlen(result), 0);
+		DEBUG_PRINTLN("Sending: ");
+	}
+}
+
+#define LORA_RECEIVE_BUFFER_SIZE 200
+#define LORA_RECEIVE_BUFFER_LIMIT LORA_RECEIVE_BUFFER_SIZE-1
+
+char LoraReceivedBuffer[LORA_RECEIVE_BUFFER_SIZE];
+
 void onEvent(ev_t ev)
 {
 	int i, j;
@@ -143,16 +160,23 @@ void onEvent(ev_t ev)
 		break;
 	case EV_TXCOMPLETE:
 		if (LMIC.dataLen) {
-        // data received in rx slot after tx
-        // if any data received, a LED will blink
-        // this number of times, with a maximum of 10
-        TRACELN(F("Data Received: "));
-			for(int i=0; i<LMIC.dataLen; i++)
+			TRACELN(F("Data Received: "));
+			for (int i = 0; i < LMIC.dataLen; i++)
 			{
-				TRACE_HEX(LMIC.frame[LMIC.dataBeg+i]);
+				TRACE_HEX(LMIC.frame[LMIC.dataBeg + i]);
 				TRACE(" ");
 			}
 			TRACELN();
+
+			if (LMIC.dataLen < LORA_RECEIVE_BUFFER_LIMIT)
+			{
+				for (int i = 0; i < LMIC.dataLen; i++)
+				{
+					LoraReceivedBuffer[i] = LMIC.frame[LMIC.dataBeg + i];
+				}
+				LoraReceivedBuffer[LMIC.dataLen] = 0;
+				act_onJson_command(LoraReceivedBuffer, lora_deliver_command_result);
+			}
 		}
 		DEBUG_PRINTLN("EV_TXCOMPLETE (includes waiting for RX windows)");
 		OK_to_send = true;
@@ -230,6 +254,8 @@ void do_send(osjob_t* j) {
 		DEBUG_PRINTLN("Sending: ");
 	}
 }
+
+
 
 void abp_setup_lora()
 {

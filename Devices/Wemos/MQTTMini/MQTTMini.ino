@@ -1,3 +1,8 @@
+#include <DNSServer.h>
+#include <ESP8266WebServerSecureBearSSL.h>
+#include <ESP8266WebServerSecureAxTLS.h>
+#include <ESP8266WebServerSecure.h>
+#include <ESP8266WebServer.h>
 #include <ezTime.h>
 
 // Uncomment to enable debug output
@@ -22,11 +27,13 @@
 #include <ESP8266WiFiGeneric.h>
 #include <ESP8266WiFiAP.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266WebServer.h>
 #include <PubSubClient.h>
 #include <SoftwareSerial.h>
 
 #include "shared.h"
 #include "utils.h"
+#include "inputSwitch.h"
 #include "ArduinoJson-v5.13.2.h"
 #include "clock.h"
 #include "timing.h"
@@ -36,13 +43,19 @@
 #include "mqtt.h"
 #include "ZPH01.h"
 #include "PixelControl.h"
+#include "WiFiConfig.h"
+#include "stateManager.h"
+
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  delay(100);
   Serial.println("Starting");
+  WiFi.mode(WIFI_OFF);
   setup_zph01();
   setup_pixels();
+  setup_input();
   setup_commands();
   setup_wifi();
   setup_mqtt();
@@ -50,9 +63,12 @@ void setup() {
    setup_clock();
 #endif
   setup_timing();
+  setup_wifiConfig();
+  setup_StateManager();
 }
 
 void loop() {
+	loop_input();
 	loop_commands();
 #ifndef SECURE_SOCKETS
 	loop_clock();
@@ -62,4 +78,6 @@ void loop() {
 	loop_zph01();
 	loop_pixels();
 	loop_timing();
+	loop_wifiConfig();
+	loop_StateManager();
 }

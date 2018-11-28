@@ -37,8 +37,6 @@ unsigned long time_to_next_mqtt_update()
 
 void readings_ready()
 {
-	updateReadingDisplay(pub_ppm_25);
-
 	if (settings.mqtt_enabled)
 	{
 		unsigned long time_in_millis = millis();

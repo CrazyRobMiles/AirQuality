@@ -257,6 +257,7 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\SensorReader\heltec_wifi_kit_32_esp32\R
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32\libraries\Wire\src/Wire.h \
  C:\Users\Rob\Documents\Arduino\hardware\heltec\esp32\cores\esp32/esp32-hal.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\SensorReader\heltec_wifi_kit_32_esp32\Release\utils.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\SensorReader\heltec_wifi_kit_32_esp32\Release\shared.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\SensorReader\heltec_wifi_kit_32_esp32\Release\commands.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\SensorReader\heltec_wifi_kit_32_esp32\Release\bme280.h \
  C:\Users\Rob\Documents\Arduino\libraries\Adafruit_Sensor/Adafruit_Sensor.h \

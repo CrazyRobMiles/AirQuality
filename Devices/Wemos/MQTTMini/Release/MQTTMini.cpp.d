@@ -59,47 +59,19 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/debug.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\d1_mini/pins_arduino.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\variants\d1_mini/../generic/common.h \
- C:\Users\Rob\Documents\Arduino\libraries\ezTime\src/ezTime.h \
- C:\Users\Rob\Documents\Arduino\libraries\Adafruit_NeoPixel/Adafruit_NeoPixel.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\EEPROM/EEPROM.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\DNSServer\src/DNSServer.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiUdp.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Udp.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/IPAddress.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Printable.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/include/slist.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServer.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecureBearSSL.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServer.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFi.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/include/wl_definitions.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Server.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecure.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecureAxTLS.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClient.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Print.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Client.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/IPAddress.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/include/slist.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/include/ssl.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_hash.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_hmac.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_rand.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_prf.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_block.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_aead.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_rsa.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_ec.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_ssl.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_x509.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_pem.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_port.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/BearSSLHelpers.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/CertStoreBearSSL.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/BearSSLHelpers.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClient.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiType.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/queue.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiSTA.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiType.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiGeneric.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/user_interface.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/os_type.h \
@@ -126,24 +98,63 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/queue.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/spi_flash.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/gpio.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiScan.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiMulti.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFi.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiSTA.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiAP.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiScan.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClient.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Print.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Client.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/IPAddress.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/include/slist.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServer.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\cores\esp8266/Server.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServerSecure.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServerSecureAxTLS.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServerSecureBearSSL.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecureBearSSL.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_hash.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_hmac.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_rand.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_prf.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_block.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_aead.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_rsa.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_ec.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_ssl.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_x509.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_pem.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2/tools/sdk/include/bearssl/bearssl_port.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/BearSSLHelpers.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/CertStoreBearSSL.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/BearSSLHelpers.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecure.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecureAxTLS.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/include/ssl.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/detail/RequestHandler.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServerSecureBearSSL.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecureAxTLS.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServerSecure.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecure.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecureAxTLS.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecureBearSSL.h \
+ C:\Users\Rob\Documents\Arduino\libraries\ezTime\src/ezTime.h \
+ C:\Users\Rob\Documents\Arduino\libraries\Adafruit_NeoPixel/Adafruit_NeoPixel.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\EEPROM/EEPROM.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServer.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClientSecure.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiClient.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiType.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiSTA.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiScan.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiMulti.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFi.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiGeneric.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFiAP.h \
- C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/ESP8266WiFi.h \
  C:\Users\Rob\Documents\Arduino\libraries\PubSubClient\src/PubSubClient.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\SoftwareSerial/SoftwareSerial.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\shared.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\utils.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\inputSwitch.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\ArduinoJson-v5.13.2.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\clock.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\timing.h \
@@ -152,4 +163,6 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\WiFiConnection.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\mqtt.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\ZPH01.h \
- C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\PixelControl.h
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\PixelControl.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\WiFiConfig.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\stateManager.h

@@ -1321,8 +1321,6 @@ void setup_commands()
 
 	load_settings();
 
-	settings.checkByte1 = 0;
-
 	if (!valid_stored_settings())
 	{
 		TRACELN("Stored settings reset");

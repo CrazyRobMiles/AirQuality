@@ -2,7 +2,7 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define PIXELS 16
+#define PIXELS 12
 #define VERSION 1
 
 #define NO_OF_VIRTUAL_PIXELS 12
@@ -137,9 +137,17 @@ struct Pixel
 
 struct Pixel pixels[PIXELS];
 
-struct const_color {
+struct ColourValue {
 	float r, g, b;
 };
+
+bool coloursEqual(ColourValue a, ColourValue b)
+{
+	if (a.r != b.r) return false;
+	if (a.g != b.g) return false;
+	if (a.b != b.b) return false;
+	return true;
+}
 
 #define RED_PIXEL_COLOUR 0
 #define GREEN_PIXEL_COLOUR 1
@@ -148,7 +156,7 @@ struct const_color {
 #define MAGENTA_PIXEL_COLOUR 4
 #define CYAN_PIXEL_COLOUR 5
 
-struct const_color color_list[] =
+struct ColourValue color_list[] =
 {
 	{1,0,0},  // RED
 	{0,1,0},  // GREEN
@@ -304,21 +312,21 @@ void setupVirtualPixelFactor(VirtualPixel * target, byte factor_number, float fa
 // pixels that are actually in the message
 // Need to change this is the message changes. 
 
-int pixelsInMessage[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
-
-void setupWalkingColour(const_color colour)
+void setupWalkingColour(ColourValue colour)
 {
 	byte color_pos;
 	float start_speed = 0.5;
 	float speed_update = 0.125;
+
+	float degreesPerPixel = 360 / PIXELS;
 
 	clearVirtualPixels(lamps);
 
 	//  for (int i = 0; i < sizeof(pixelsInMessage)/sizeof(int); i++)	
 	for (int i = 0; i < 8; i++)
 	{
-		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, pixelsInMessage[i], 0, 1.0);
-		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, pixelsInMessage[i], 0, 359, start_speed, do_update_loop);
+		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, i*degreesPerPixel, 0, 1.0);
+		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, i, 0, 359, start_speed, do_update_loop);
 		start_speed += speed_update;
 	}
 }
@@ -346,7 +354,7 @@ void startFade(Light_Factor * factor, float targetValue, int noOfsteps)
 	factor->do_update = do_update_fade;
 }
 
-void fadeWalkingColor(struct VirtualPixel * lamps, const_color newColour, int noOfSteps)
+void fadeWalkingColor(struct VirtualPixel * lamps, ColourValue newColour, int noOfSteps)
 {
 	for (int i = 0; i < NO_OF_VIRTUAL_PIXELS; i++)
 	{
@@ -361,7 +369,7 @@ void updateWalkingColor()
 	updateVirtualPixels(lamps);
 }
 
-void updateReadingDisplay(float reading)
+void updateReadingDisplay()
 {
 	//int airqLowLimit; 0 - airqLowWarnLimit
 	//int airqLowWarnLimit; airQLowLimit - arqMidWarnLimit
@@ -369,22 +377,22 @@ void updateReadingDisplay(float reading)
 	//int airqHighWarnLimit; arqMidWarnLimit - airQHighAlertLimit
 	//int airQHighAlertLimit; > airqHighWarnLimit
 
-	if (reading < settings.airqLowLimit) {
+	if (pub_ppm_25 < settings.airqLowLimit) {
 		fadeWalkingColor(lamps, color_list[GREEN_PIXEL_COLOUR], 100);
 		return;
 	}
 
-	if (reading < settings.airqLowWarnLimit) {
+	if (pub_ppm_25 < settings.airqLowWarnLimit) {
 		fadeWalkingColor(lamps, color_list[YELLOW_PIXEL_COLOUR], 100);
 		return;
 	}
 
-	if (reading < settings.airqMidWarnLimit) {
+	if (pub_ppm_25 < settings.airqMidWarnLimit) {
 		fadeWalkingColor(lamps, color_list[MAGENTA_PIXEL_COLOUR], 100);
 		return;
 	}
 
-	if (reading < settings.airqHighWarnLimit) {
+	if (pub_ppm_25 < settings.airqHighWarnLimit) {
 		fadeWalkingColor(lamps, color_list[CYAN_PIXEL_COLOUR], 100);
 		return;
 	}
@@ -402,22 +410,10 @@ void setupWalkingColours()
 
 	for (int i = 0; i < 8; i++)
 	{
-		int cn = i % (sizeof(color_list) / sizeof(const_color));
-		setupVirtualPixel(&lamps[i], color_list[cn].r, color_list[cn].g, color_list[cn].b, pixelsInMessage[i], 0, 1.0);
-		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, pixelsInMessage[i], 0, 359, start_speed, do_update_loop);
+		int cn = i % (sizeof(color_list) / sizeof(ColourValue));
+		setupVirtualPixel(&lamps[i], color_list[cn].r, color_list[cn].g, color_list[cn].b, i, 0, 1.0);
+		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, i, 0, 359, start_speed, do_update_loop);
 		start_speed += speed_update;
-	}
-}
-
-
-void setup_text_message(int r, int g, int b)
-{
-	clearVirtualPixels(lamps);
-
-	for (int i = 0; i < sizeof(pixelsInMessage) / sizeof(int); i++)
-	{
-		setupVirtualPixel(&lamps[i], r, g, b, pixelsInMessage[i], 0, 1.0);
-		setupVirtualPixelFactor(&lamps[i], FLICKER_FACTOR, 0, 0.5, 1.0, 0.01, do_update_larsen);
 	}
 }
 
@@ -472,17 +468,7 @@ int tick_count = 0;
 
 unsigned long millisOfLastUpdate;
 
-void setup_pixels()
-{
-	strip.begin();
-	strip.show(); // Initialize all pixels to 'off'
-	clearVirtualPixels(lamps);
-	setupWalkingColour({ 0,1,0 });
-	millisOfLastUpdate = millis();
-	pixel_animation_update = updateWalkingColor;
-}
-
-void loop_pixels()
+void updatePixelDisplay()
 {
 	unsigned long currentMillis = millis();
 	unsigned long millisSinceLastUpdate = ulongDiff(currentMillis, millisOfLastUpdate);
@@ -490,6 +476,146 @@ void loop_pixels()
 		pixel_animation_update();
 		millisOfLastUpdate = currentMillis;
 	}
+}
+
+ColourValue statusColour;
+int noOfStatusLights;
+
+void setPixelStatus(ColourValue colour, int noOfLights)
+{
+	if (noOfLights == noOfStatusLights && coloursEqual(colour, statusColour))
+	{
+		return;
+	}
+
+	float degreesPerPixel = 360 / PIXELS;
+
+	noOfStatusLights = noOfLights;
+	statusColour = colour;
+
+	clearVirtualPixels(lamps);
+
+	for (int i = 0; i < noOfLights; i++)
+	{
+		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, i*degreesPerPixel, 0, 1.0);
+	}
+}
+
+// force a reload of the status next time it is displayed
+void resetPixelStatus()
+{
+	noOfStatusLights = -1;
+}
+
+
+void loopWifiSetupStatus()
+{
+	switch (wifiSetupState)
+	{
+	case WiFiSetupOff:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 1);
+		break;
+	case WiFiSetupAwaitingClients:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 2);
+		break;
+	case WiFiSetupServingPage:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 3);
+		break;
+	case WiFiSetupProcessingResponse:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 4);
+		break;
+	}
+}
+
+// A status display shows a number of pixels of a particular colour
+// The status display is used by the Wifi and by the setup
+void loopPixelsStatus()
+{
+	switch (wifiState)
+	{
+	case WiFiStarting:
+		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 1);
+		break;
+
+	case WiFiScanning:
+		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 2);
+		break;
+
+	case WiFiConnecting:
+		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 3);
+		break;
+
+	case ShowingWifiConnected:
+		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 4);
+		break;
+
+	case WiFiConnectFailed:
+		setPixelStatus(color_list[RED_PIXEL_COLOUR], 1);
+		break;
+
+	case WiFiConnected:
+		switch (mqttState)
+		{
+		case AwaitingWiFi:
+			break;
+
+		case ConnectingToMQTTServer:
+			setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 5);
+			break;
+
+		case ShowingConnectedToMQTTServer:
+			setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 6);
+			break;
+
+		case ShowingConnectToMQTTServerFailed:
+			setPixelStatus(color_list[RED_PIXEL_COLOUR], 2);
+			break;
+
+		case ConnectedToMQTTServer:
+			setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 6);
+			break;
+
+		case ConnectToMQTTServerFailed:
+			setPixelStatus(color_list[RED_PIXEL_COLOUR], 2);
+			break;
+		}
+		break;
+
+	case WiFiNotConnected:
+		setPixelStatus(color_list[RED_PIXEL_COLOUR], 1);
+		break;
+	}
+
+}
+
+void loop_pixels()
+{
+	switch (deviceState)
+	{
+	case wifiSetup:
+		loopWifiSetupStatus();
+		break;
+
+	case starting:
+	case showStatus:
+		loopPixelsStatus();
+		break;
+
+	case active:
+		updateReadingDisplay();
+		break;
+	}
+	updatePixelDisplay();
+}
+
+void setup_pixels()
+{
+	strip.begin();
+	strip.show(); // Initialize all pixels to 'off'
+	clearVirtualPixels(lamps);
+	millisOfLastUpdate = millis();
+	pixel_animation_update = updateWalkingColor;
+	resetPixelStatus();
 }
 
 

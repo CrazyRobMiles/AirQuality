@@ -3,24 +3,6 @@
 // used from timing.h
 void setup_timing();
 
-
-#define DEVICE_NAME_LENGTH 10
-
-#define WIFI_SSID_LENGTH 30
-#define WIFI_PASSWORD_LENGTH 30
-
-#define MQTT_SERVER_NAME_LENGTH 100
-#define MQTT_USER_NAME_LENGTH 100
-#define MQTT_PASSWORD_LENGTH 200
-#define MQTT_DEVICE_NAME_LENGTH 100
-#define MQTT_PUBLISH_TOPIC_LENGTH 100
-#define MQTT_SUBSCRIBE_TOPIC_LENGTH 100
-
-#define SPLASH_LINE_LENGTH 15
-
-#define LORA_KEY_LENGTH 16
-#define LORA_EUI_LENGTH 8
-
 #define EEPROM_SIZE 1000
 #define SETTINGS_EEPROM_OFFSET 0
 
@@ -115,55 +97,6 @@ void build_number_value_command_reply(int errorNo, int result, JsonObject& root,
 
 	strcat(resultBuffer, replyBuffer);
 }
-
-struct WiFi_Setting
-{
-	char wifiSsid[WIFI_SSID_LENGTH];
-	char wifiPassword[WIFI_PASSWORD_LENGTH];
-};
-
-#define NO_OF_WIFI_SETTINGS 5
-
-struct Device_Settings
-{
-	int version;
-	byte checkByte1;
-	char deviceNane[DEVICE_NAME_LENGTH];
-
-	WiFi_Setting wifiSettings[NO_OF_WIFI_SETTINGS];
-	bool wiFiOn = true;
-	char mqttServer [MQTT_SERVER_NAME_LENGTH];
-	int mqttPort;
-	char mqttUser [MQTT_USER_NAME_LENGTH] ;
-	char mqttPassword [MQTT_PASSWORD_LENGTH ] ;
-	char mqttName [MQTT_DEVICE_NAME_LENGTH] ;
-	char mqttPublishTopic[MQTT_PUBLISH_TOPIC_LENGTH];
-	char mqttSubscribeTopic[MQTT_SUBSCRIBE_TOPIC_LENGTH];
-
-	int seconds_per_mqtt_update;
-	int seconds_per_mqtt_retry;
-
-	int seconds_per_lora_update;
-	bool lora_enabled = true;
-	bool lora_abp_active = true;
-
-	u4_t lora_abp_DEVADDR;
-	u1_t lora_abp_NWKSKEY[LORA_KEY_LENGTH];
-	u1_t lora_abp_APPSKEY[LORA_KEY_LENGTH];
-
-	u1_t lora_otaa_APPKEY[LORA_KEY_LENGTH];
-	u1_t lora_otaa_DEVEUI[LORA_EUI_LENGTH];
-	u1_t lora_otaa_APPEUI[LORA_EUI_LENGTH];
-
-	boolean mqtt_enabled = true;
-
-  char splash_screen_top_line [SPLASH_LINE_LENGTH]; 
-  char splash_screen_bottom_line [SPLASH_LINE_LENGTH]; 
-  
-  byte checkByte2;
-};
-
-struct Device_Settings settings;
 
 void dump_hex(u1_t * pos, int length)
 {

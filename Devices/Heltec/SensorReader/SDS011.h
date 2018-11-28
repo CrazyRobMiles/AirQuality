@@ -5,7 +5,7 @@
 
 #include <HardwareSerial.h>
 
-HardwareSerial MySerial(1);
+HardwareSerial SDSSensorSerial(1);
 
 #define MESSAGE_START 0xAA
 
@@ -311,7 +311,7 @@ void send_block(uint8_t * block_base, int block_length)
 		TRACE("Writing byte:");
 		TRACE_HEXLN(reporting_mode_command[i]);
 
-		MySerial.write(reporting_mode_command[i]);
+		SDSSensorSerial.write(reporting_mode_command[i]);
 	}
 }
 
@@ -387,7 +387,7 @@ void setup_sensor()
 {
 	TRACELN("Setting up Sensor");
 
-	MySerial.begin(9600, SERIAL_8N1, 17, -1);  // badud, mode, rx, tx
+	SDSSensorSerial.begin(9600, SERIAL_8N1, 17, -1);  // badud, mode, rx, tx
 	reset_message();
 	pub_air_values_ready = false;
 	set_reporting_mode(true);
@@ -395,8 +395,8 @@ void setup_sensor()
 
 void loop_sensor()
 {
-	while (MySerial.available() > 0) {
-		uint8_t byteFromSerial = MySerial.read();
+	while (SDSSensorSerial.available() > 0) {
+		uint8_t byteFromSerial = SDSSensorSerial.read();
 		pump_byte(byteFromSerial);
 	}
 }

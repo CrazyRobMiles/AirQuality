@@ -57,5 +57,14 @@
     <ClInclude Include="shared.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="inputSwitch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stateManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WiFiConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,5 +1,9 @@
 #pragma once
 
+enum DeviceStates { starting, wifiSetup, showStatus, active};
+
+DeviceStates deviceState;
+
 #define NO_OF_WIFI_SETTINGS 5
 #define DEVICE_NAME_LENGTH 10
 
@@ -61,6 +65,9 @@ ClockState clockState;
 enum MQTTState { AwaitingWiFi, ConnectingToMQTTServer, ShowingConnectedToMQTTServer, ShowingConnectToMQTTServerFailed, ConnectedToMQTTServer, ConnectToMQTTServerFailed };
 
 MQTTState mqttState;
+
+enum WiFiSetupState { WiFiSetupOff, WiFiSetupAwaitingClients, WiFiSetupServingPage, WiFiSetupProcessingResponse};
+WiFiSetupState wifiSetupState;
 
 // From clock.h
 bool pub_clock_valid;

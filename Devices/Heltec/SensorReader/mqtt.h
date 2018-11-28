@@ -15,7 +15,6 @@ WiFiClient espClient;
 
 PubSubClient client(espClient);
 
-
 #define MQTT_RECEIVE_BUFFER_SIZE 240
 char mqtt_receive_buffer[MQTT_RECEIVE_BUFFER_SIZE];
 

@@ -27,6 +27,7 @@
 #define INVALID_LORA_STATUS_SETTING 22
 #define MISSING_WIFI_SETTING_NUMBER 23
 #define INVALID_WIFI_SETTING_NUMBER 24
+#define INVALID_COLOUR_NAME 25
 
 #define REPLY_ELEMENT_SIZE 100
 #define COMMAND_REPLY_BUFFER_SIZE 240
@@ -645,6 +646,31 @@ void do_mqtt_host(JsonObject& root, char * resultBuffer)
 	build_command_reply(reply, root, resultBuffer);
 }
 
+// {"v":1, "t" : "sensor01", "c" : "mqtt", "o" : "user", "val":"username" }
+void do_mqtt_user(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		const char * option = root["val"];
+
+		if (!option)
+		{
+			build_text_value_command_reply(WORKED_OK, settings.mqttUser, root, resultBuffer);
+			return;
+		}
+
+		reply = decodeStringValue(settings.mqttPassword, root, "val", MQTT_USER_NAME_LENGTH - 1);
+		if (reply == WORKED_OK)
+		{
+			save_settings();
+		}
+	}
+
+	build_command_reply(reply, root, resultBuffer);
+}
+
 // {"v":1, "t" : "sensor01", "c" : "mqtt", "o" : "pwd", "val":"123456" }
 void do_mqtt_password(JsonObject& root, char * resultBuffer)
 {
@@ -711,6 +737,7 @@ OptionDecodeItems mqttOptionDecodeItems[] = {
 	{"publish", do_mqtt_publish_location},
 	{"subscribe", do_mqtt_subscribe_location},
 	{"id", do_mqtt_device_id},
+	{"user", do_mqtt_user},
 	{"pwd", do_mqtt_password},
 	{"host", do_mqtt_host},
 	{"port", do_mqtt_port}
@@ -853,52 +880,97 @@ void do_device_name(JsonObject& root, char * resultBuffer)
 
 #define COLOUR_NAME_LENGTH 10
 
+void updatePixelColor(float r, float g, float b)
+{
+	settings.pixel_red = r;
+	settings.pixel_green = g;
+	settings.pixel_blue = b;
+	save_settings();
+}
+
+struct colourDecode {
+	char * colourName;
+	float red;
+	float green;
+	float blue;
+};
+
+struct colourDecode colourDecoder[] = {
+	{"red", 1.0, 0, 0},
+	{"green", 0,1.0,0},
+	{"blue", 0,1.0,0},
+	{"cyan", 0,1.0,1.0},
+	{"magenta", 1.0,0,1.0},
+	{"yellow", 1.0,1.0,0},
+	{"white", 1.0,1.0,1.0},
+	{"black", 0,0,0},
+};
+
+
+bool setDecodedColor(char * name)
+{
+	for (int i = 0; i < sizeof(colourDecoder) / sizeof(colourDecode); i++)
+	{
+		if (strcasecmp(name, colourDecoder[i].colourName) == 0)
+		{
+			settings.pixel_red = colourDecoder[i].red;
+			settings.pixel_green = colourDecoder[i].green;
+			settings.pixel_blue = colourDecoder[i].blue;
+			return true;
+		}
+	}
+	return false;
+}
+
+
 // {"v":1, "t" : "sensor01", "c" : "node", "o" : "pixel", "val":"red"}
 void do_pixel_colour(JsonObject& root, char * resultBuffer)
 {
 	int reply = checkTargetDeviceName(root);
-	char colour_name[COLOUR_NAME_LENGTH];
-
 
 	if (reply == WORKED_OK)
 	{
-		reply = decodeStringValue(colour_name, root, "val", COLOUR_NAME_LENGTH - 1);
+		char colourName [COLOUR_NAME_LENGTH];
+		reply = decodeStringValue(colourName, root, "val", COLOUR_NAME_LENGTH - 1);
+		if (setDecodedColor(colourName))
+		{
+			save_settings();
+		}
+		else
+		{
+			reply = INVALID_COLOUR_NAME;
+		}
+	}
+
+	build_command_reply(reply, root, resultBuffer);
+}
+
+// {"v":1, "t" : "sensor01", "c" : "node", "o" : "pixels", "val":1}
+void do_noOfPixels(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		const char * option = root["val"];
+
+		if (!option)
+		{
+			build_number_value_command_reply(WORKED_OK, settings.noOfPixels, root, resultBuffer);
+			return;
+		}
+
+		reply = decodeNumericValue(&settings.noOfPixels, root, "val", 0, MAX_NO_OF_PIXELS);
+
 		if (reply == WORKED_OK)
 		{
 			save_settings();
 		}
 	}
 
-	if (strcasecmp(colour_name, "red") == 0)
-	{
-		safe_r = 255;
-		safe_g = 0;
-		safe_b = 0;
-	}
-
-	if (strcasecmp(colour_name, "green") == 0)
-	{
-		safe_r = 0;
-		safe_g = 255;
-		safe_b = 0;
-	}
-
-	if (strcasecmp(colour_name, "blue") == 0)
-	{
-		safe_r = 0;
-		safe_g = 0;
-		safe_b = 255;
-	}
-
-	if (strcasecmp(colour_name, "black") == 0)
-	{
-		safe_r = 0;
-		safe_g = 0;
-		safe_b = 0;
-	}
-
 	build_command_reply(reply, root, resultBuffer);
 }
+
 
 // {"v":1, "t" : "sensor01", "c" : "node", "o" : "airqlow", "val":1}
 void do_airqLowLimit(JsonObject& root, char * resultBuffer)
@@ -1040,15 +1112,44 @@ void do_airqHighAlertLimit(JsonObject& root, char * resultBuffer)
 }
 
 
+// {"v":1, "t" : "sensor01", "c" : "node", "o" : "airqsensor", "val":1}
+void do_airqSensorType(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		const char * option = root["val"];
+
+		if (!option)
+		{
+			build_number_value_command_reply(WORKED_OK, settings.airqSensorType, root, resultBuffer);
+			return;
+		}
+
+		reply = decodeNumericValue(&settings.airqSensorType, root, "val", MIN_AIRQ_SENSOR_NO, MAX_AIRQ_SENSOR_NO);
+
+		if (reply == WORKED_OK)
+		{
+			save_settings();
+		}
+	}
+
+	build_command_reply(reply, root, resultBuffer);
+}
+
+
 OptionDecodeItems nodeOptionDecodeItems[] = {
 	{"ver", do_node_version},
 	{"devname", do_device_name},
+	{"pixels", do_noOfPixels },
 	{"pixel", do_pixel_colour },
 	{"airqlow", do_airqLowLimit},
 	{"airqlowwarn", do_airqLowWarnLimit},
 	{"airqmidwarn", do_airqMidWarnLimit},
 	{"airqhighwarn", do_airqHighWarnLimit},
 	{"airqhighalert", do_airqHighAlertLimit},
+	{"airqsensor", do_airqSensorType},
 };
 
 struct CommandDecoder
@@ -1183,6 +1284,7 @@ boolean valid_stored_settings()
 
 void reset_settings()
 {
+	Serial.println("Settings reset");
 	settings.version = 1;
 	settings.checkByte1 = CHECK_BYTE_O1;
 	settings.checkByte2 = CHECK_BYTE_O2;
@@ -1192,8 +1294,8 @@ void reset_settings()
 	settings.wiFiOn = true;
 
 	// enter some pre-set WiFi locations
-	strcpy(settings.wifiSettings[0].wifiSsid, "sdfsdf");
-	strcpy(settings.wifiSettings[0].wifiPassword, "sdfsd");
+	strcpy(settings.wifiSettings[0].wifiSsid, "ZyXEL56E8A7");
+	strcpy(settings.wifiSettings[0].wifiPassword, "DAB6E5A9EC25");
 
 	strcpy(settings.wifiSettings[1].wifiSsid, "sdfdfdf");
 	strcpy(settings.wifiSettings[1].wifiPassword, "fdfsddf");
@@ -1214,11 +1316,17 @@ void reset_settings()
 	// You can put default settings here
 	// These are copied into the device when it is first started
 
+	settings.airqSensorType = ZPH01_SENSOR; 
 	settings.airqLowLimit = 1;
 	settings.airqLowWarnLimit = 2;
 	settings.airqMidWarnLimit = 3;
 	settings.airqHighWarnLimit = 4;
 	settings.airQHighAlertLimit = 5;
+
+	settings.noOfPixels = 12;
+	settings.pixel_red = 0;
+	settings.pixel_blue = 0;
+	settings.pixel_green = 1.0;
 
 #ifdef SECURE_SOCKETS
 
@@ -1240,6 +1348,16 @@ void reset_settings()
 	strcpy(settings.mqttName, "Sensor01");
 	strcpy(settings.mqttPublishTopic, "sensor01/data");
 	strcpy(settings.mqttSubscribeTopic, "sensor01/commands");
+
+
+	strcpy(settings.mqttServer, "mqtt.connectedhumber.org");
+	settings.mqttPort = 1883;
+	strcpy(settings.mqttUser, "connectedhumber");
+	strcpy(settings.mqttPassword, "3fds8gssf6");
+	strcpy(settings.mqttName, "Sensor02");
+	strcpy(settings.mqttPublishTopic, "sensor02/data");
+	strcpy(settings.mqttSubscribeTopic, "sensor02/commands");
+
 
 #endif
 }

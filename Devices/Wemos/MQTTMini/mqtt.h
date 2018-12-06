@@ -47,7 +47,8 @@ boolean send_to_mqtt()
 
 			// still regard the fix as valid - add lat and long to the message
 			sprintf(mqtt_send_buffer,
-				"{\"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+				"{\"PM10\" : %.2f, \"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+				pub_ppm_10,
 				pub_ppm_25,
 				latitude,
 				longitude,

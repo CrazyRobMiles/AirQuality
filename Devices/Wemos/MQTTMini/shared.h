@@ -2,6 +2,15 @@
 
 enum DeviceStates { starting, wifiSetup, showStatus, active};
 
+// Sensor settings
+#define SDS011_SENSOR 1
+#define ZPH01_SENSOR 2
+#define MIN_AIRQ_SENSOR_NO 1
+#define MAX_AIRQ_SENSOR_NO 2
+
+// Pixel display settings
+#define MAX_NO_OF_PIXELS 64
+
 DeviceStates deviceState;
 
 #define NO_OF_WIFI_SETTINGS 5
@@ -43,11 +52,18 @@ struct Device_Settings
 	int seconds_per_mqtt_retry;
 	boolean mqtt_enabled = true;
 
+	int airqSensorType;
+
 	int airqLowLimit;
 	int airqLowWarnLimit;
 	int airqMidWarnLimit;
 	int airqHighWarnLimit;
 	int airQHighAlertLimit;
+
+	int noOfPixels;
+	float pixel_red;
+	float pixel_green;
+	float pixel_blue;
 
 	byte checkByte2;
 };
@@ -75,8 +91,16 @@ uint8_t pub_hour, pub_minute, pub_second, pub_day_of_week;
 uint8_t pub_day, pub_month;
 uint16_t pub_year;
 
-// Set by ZP01.h
+// Used by ZPH01.h and SDS011.h
+
+SoftwareSerial SensorSerial(12, 13, false, 128);
+
+// Set by ZP01.h and SDS011
 float pub_ppm_25;
+
+// Set by SDS011
+float pub_ppm_10;
+
 // set to true when the next set of values are ready
 boolean pub_air_values_ready;
 
@@ -91,10 +115,6 @@ long pub_longitude_mdeg;
 unsigned long pub_ticks_at_last_gps_update;
 bool pub_got_gps_fix;
 #define MILLIS_LIFETIME_OF_GPS_FIX 30000
-
-// Used by the pixel colours
-
-byte safe_r = 0, safe_g = 0, safe_b = 0;
 
 // Used by timing.h
 uint32_t pub_millis_at_next_update;

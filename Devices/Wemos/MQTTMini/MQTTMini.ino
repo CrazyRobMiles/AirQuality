@@ -41,7 +41,7 @@
 #include "commands.h"
 #include "WiFiConnection.h"
 #include "mqtt.h"
-#include "ZPH01.h"
+#include "AirQSensor.h"
 #include "PixelControl.h"
 #include "WiFiConfig.h"
 #include "stateManager.h"
@@ -53,10 +53,11 @@ void setup() {
   delay(100);
   Serial.println("Starting");
   WiFi.mode(WIFI_OFF);
-  setup_zph01();
-  setup_pixels();
+  setup_commands(); // must call this first because it loads all the settings used by 
+                    // all the elements
+  setup_airq_sensor();
   setup_input();
-  setup_commands();
+  setup_pixels();
   setup_wifi();
   setup_mqtt();
 #ifndef SECURE_SOCKETS
@@ -75,7 +76,7 @@ void loop() {
 #endif
 	loop_mqtt();
 	loop_wifi();
-	loop_zph01();
+	loop_airq_sensor();
 	loop_pixels();
 	loop_timing();
 	loop_wifiConfig();

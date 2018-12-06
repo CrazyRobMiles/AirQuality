@@ -66,5 +66,11 @@
     <ClInclude Include="WiFiConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="SDS011.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AirQSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

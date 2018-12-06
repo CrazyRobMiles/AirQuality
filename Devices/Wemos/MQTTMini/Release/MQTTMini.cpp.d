@@ -162,7 +162,9 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\commands.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\WiFiConnection.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\mqtt.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\AirQSensor.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\ZPH01.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\SDS011.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\PixelControl.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\WiFiConfig.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\stateManager.h

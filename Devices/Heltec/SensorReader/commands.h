@@ -553,6 +553,7 @@ void do_mqtt_publish_location(JsonObject& root, char * resultBuffer)
 		}
 
 		reply = decodeStringValue(settings.mqttPublishTopic, root, "val", MQTT_PUBLISH_TOPIC_LENGTH - 1);
+
 		if (reply == WORKED_OK)
 		{
 			save_settings();
@@ -1519,6 +1520,7 @@ void setup_commands()
 
 	if (!valid_stored_settings())
 	{
+		Serial.println("resetting settings");
 		TRACELN("Stored settings reset");
 		reset_settings();
 		save_settings();

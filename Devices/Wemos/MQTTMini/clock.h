@@ -56,6 +56,7 @@ void loop_clock()
 			clockState = ClockAwaitingSync;
 		}
 		break;
+
 	case ClockAwaitingSync:
 		TRACELN("Waiting for clock sync");
 		if (waitForSync(CLOCK_SYNC_TIMEOUT)) {

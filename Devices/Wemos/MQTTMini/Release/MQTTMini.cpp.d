@@ -138,6 +138,7 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecureAxTLS.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WebServer\src/ESP8266WebServerSecureBearSSL.h \
  C:\Users\Rob\Documents\Arduino\libraries\ezTime\src/ezTime.h \
+ C:\Users\Rob\Documents\Arduino\libraries\MicroNMEA-master\src/MicroNMEA.h \
  C:\Users\Rob\Documents\Arduino\libraries\Adafruit_NeoPixel/Adafruit_NeoPixel.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\EEPROM/EEPROM.h \
  C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\ESP8266WiFi\src/WiFiServer.h \
@@ -158,6 +159,7 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\ArduinoJson-v5.13.2.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\clock.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\timing.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\gps.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\menu.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\commands.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\WiFiConnection.h \
@@ -165,6 +167,11 @@ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\MQTTMi
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\AirQSensor.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\ZPH01.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\SDS011.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\bme280.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\Wire/Wire.h \
+ C:\Users\Rob\AppData\Local\arduino15\packages\esp8266\hardware\esp8266\2.4.2\libraries\SPI/SPI.h \
+ C:\Users\Rob\Documents\Arduino\libraries\Adafruit_Sensor/Adafruit_Sensor.h \
+ C:\Users\Rob\Documents\Arduino\libraries\Adafruit_BME280_Library/Adafruit_BME280.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\PixelControl.h \
- C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\WiFiConfig.h \
+ C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\power.h \
  C:\Users\Rob\AppData\Local\Temp\VMBuilds\MQTTMini\esp8266_d1_mini\Release\stateManager.h

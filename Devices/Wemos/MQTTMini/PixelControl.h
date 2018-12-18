@@ -11,9 +11,7 @@
 
 #define MILLIS_BETWEEN_UPDATES 20
 
-#define NEOPIN 2
-
-Adafruit_NeoPixel strip ;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(12, NEOPIXEL_CONTOL_PIN, NEO_GRB + NEO_KHZ800);
 
 // All the brightness values are between 0 and 1
 // Scale them for the particular display
@@ -502,6 +500,7 @@ void setPixelStatus(ColourValue colour, int noOfLights)
 	{
 		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, i*degreesPerPixel, 0, 1.0);
 	}
+	renderVirtualPixels(lamps);
 }
 
 // force a reload of the status next time it is displayed
@@ -511,36 +510,34 @@ void resetPixelStatus()
 }
 
 
-void loopWifiSetupStatus()
-{
-	switch (wifiSetupState)
-	{
-	case WiFiSetupOff:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 1);
-		break;
-	case WiFiSetupAwaitingClients:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 2);
-		break;
-	case WiFiSetupServingPage:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 3);
-		break;
-	case WiFiSetupProcessingResponse:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 4);
-		break;
-	}
-}
-
 // A status display shows a number of pixels of a particular colour
 // The status display is used by the Wifi and by the setup
-void loopPixelsStatus()
+void displayPixelStatus()
 {
 	switch (wifiState)
 	{
+	case WiFiSetupAwaitingClients:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 1);
+		break;
+
+	case WiFiSetupServingPage:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 2);
+		break;
+
+	case WiFiSetupProcessingResponse:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 3);
+		break;
+
+	case WiFiSetupDone:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 4);
+		break;
+
 	case WiFiStarting:
 		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 1);
 		break;
 
 	case WiFiScanning:
+	case WiFiWaitingForNextScan:
 		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 2);
 		break;
 
@@ -588,7 +585,6 @@ void loopPixelsStatus()
 		setPixelStatus(color_list[RED_PIXEL_COLOUR], 1);
 		break;
 	}
-
 }
 
 void pixel_update()
@@ -596,12 +592,9 @@ void pixel_update()
 	switch (deviceState)
 	{
 	case wifiSetup:
-		loopWifiSetupStatus();
-		break;
-
 	case starting:
 	case showStatus:
-		loopPixelsStatus();
+		displayPixelStatus();
 		break;
 
 	case active:
@@ -621,6 +614,9 @@ void(*active_pixel_loop) ();
 
 void setup_pixels()
 {
+	TRACE("No of pixels: ");
+	TRACELN(settings.noOfPixels);
+
 	if (settings.noOfPixels == 0)
 	{
 		active_pixel_loop = empty_pixel_update;
@@ -628,7 +624,7 @@ void setup_pixels()
 	else
 	{
 		active_pixel_loop = pixel_update;
-		strip = Adafruit_NeoPixel(settings.noOfPixels, NEOPIN, NEO_GRB + NEO_KHZ800);
+//		strip = 
 		strip.begin();
 		strip.show(); // Initialize all pixels to 'off'
 		clearVirtualPixels(lamps);

@@ -216,3 +216,6 @@ pip-log.txt
 .mr.developer.cfg
 
 packages/
+
+#Arduino Wemos and Heltec Build
+*.o

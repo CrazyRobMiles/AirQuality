@@ -4,6 +4,7 @@
 #include <ESP8266WebServerSecure.h>
 #include <ESP8266WebServer.h>
 #include <ezTime.h>
+#include <MicroNMEA.h>
 
 // Uncomment to enable debug output
 //#define DEBUG
@@ -37,48 +38,56 @@
 #include "ArduinoJson-v5.13.2.h"
 #include "clock.h"
 #include "timing.h"
+#include "gps.h"
 #include "menu.h"
 #include "commands.h"
 #include "WiFiConnection.h"
 #include "mqtt.h"
 #include "AirQSensor.h"
+#include "bme280.h"
 #include "PixelControl.h"
-#include "WiFiConfig.h"
+#include "power.h"
 #include "stateManager.h"
 
 
 void setup() {
-  // put your setup code here, to run once:
-  Serial.begin(115200);
-  delay(100);
-  Serial.println("Starting");
-  WiFi.mode(WIFI_OFF);
-  setup_commands(); // must call this first because it loads all the settings used by 
-                    // all the elements
-  setup_airq_sensor();
-  setup_input();
-  setup_pixels();
-  setup_wifi();
-  setup_mqtt();
+	// put your setup code here, to run once:
+	Serial.begin(115200);
+	delay(1000);
+	Serial.println("Starting");
+	delay(500);
+	setup_commands(); // must call this first because it loads all the settings used by 
+					  // all the elements
+	setup_airq_sensor();
+	setup_bme280();
+	setup_power();
+	setup_input();
+	setup_pixels();
+	setup_wifi();
+	setup_mqtt();
+	setup_gps();
 #ifndef SECURE_SOCKETS
-   setup_clock();
+	setup_clock();
 #endif
-  setup_timing();
-  setup_wifiConfig();
-  setup_StateManager();
+	setup_timing();
+	setup_StateManager();
 }
 
 void loop() {
+
 	loop_input();
 	loop_commands();
+
 #ifndef SECURE_SOCKETS
 	loop_clock();
 #endif
 	loop_mqtt();
 	loop_wifi();
 	loop_airq_sensor();
+	loop_gps();
+	loop_bme280();
+	loop_power();
 	loop_pixels();
 	loop_timing();
-	loop_wifiConfig();
 	loop_StateManager();
 }

@@ -418,7 +418,6 @@ int checkTargetDeviceName(JsonObject& root)
 }
 
 // request: {"v":1, "t" : "Sensor01", "c" : "mqtt", "o" : "send"}
-// return : { 
 void do_send_mqtt(JsonObject& root, char * resultBuffer)
 {
 	int reply = checkTargetDeviceName(root);
@@ -746,7 +745,7 @@ OptionDecodeItems mqttOptionDecodeItems[] = {
 
 // forward declaration - function in WiFiConnection.h
 
-void start_wifi();
+void startWifi();
 
 // {"v":1, "t" : "Sensor01", "c" : "wifi", "o" : "on"}
 void do_wifi_on(JsonObject& root, char * resultBuffer)
@@ -756,7 +755,7 @@ void do_wifi_on(JsonObject& root, char * resultBuffer)
 	if (reply == WORKED_OK)
 	{
 		TRACELN("Starting WiFi");
-		start_wifi();
+		startWifi();
 	}
 	build_command_reply(reply, root, resultBuffer);
 }
@@ -869,13 +868,50 @@ void do_node_version(JsonObject& root, char * resultBuffer)
 	build_command_reply(WORKED_OK, root, resultBuffer + length);
 }
 
-// {"v":1, "c" : "node", "o" : "devname"}
-void do_device_name(JsonObject& root, char * resultBuffer)
+// {"v":1, "c" : "node", "o" : "getdevname"}
+void do_get_device_name(JsonObject& root, char * resultBuffer)
 {
 	TRACELN("Getting device name");
-	int length = sprintf(resultBuffer, "{\"nodename\":%s,", settings.deviceNane);
 
+	int length = sprintf(resultBuffer, "{\"nodename\":\"%s\",", settings.deviceNane);
 	build_command_reply(WORKED_OK, root, resultBuffer + length);
+}
+
+// {"v":1, "t" : "sensor01", "c" : "node", "o" : "devname", "val":"sensor01"}
+void do_device_name(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		const char * option = root["val"];
+
+		if (!option)
+		{
+			build_text_value_command_reply(WORKED_OK, settings.deviceNane, root, resultBuffer);
+			return;
+		}
+
+		reply = decodeStringValue(settings.deviceNane, root, "val", DEVICE_NAME_LENGTH - 1);
+		if (reply == WORKED_OK)
+		{
+			save_settings();
+		}
+	}
+
+	build_command_reply(reply, root, resultBuffer);
+}
+
+// {"v":1, "t" : "sensor01", "c" : "node", "o" : "reset"}
+void do_reset(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		ESP.restart();
+	}
+	build_command_reply(reply, root, resultBuffer);
 }
 
 #define COLOUR_NAME_LENGTH 10
@@ -1141,6 +1177,8 @@ void do_airqSensorType(JsonObject& root, char * resultBuffer)
 
 OptionDecodeItems nodeOptionDecodeItems[] = {
 	{"ver", do_node_version},
+	{"getdevname", do_get_device_name},
+	{"reset", do_reset },
 	{"devname", do_device_name},
 	{"pixels", do_noOfPixels },
 	{"pixel", do_pixel_colour },
@@ -1294,8 +1332,8 @@ void reset_settings()
 	settings.wiFiOn = true;
 
 	// enter some pre-set WiFi locations
-	strcpy(settings.wifiSettings[0].wifiSsid, "ZyXEL56E8A7");
-	strcpy(settings.wifiSettings[0].wifiPassword, "DAB6E5A9EC25");
+	strcpy(settings.wifiSettings[0].wifiSsid, "sdfsdf");
+	strcpy(settings.wifiSettings[0].wifiPassword, "sdfsfd");
 
 	strcpy(settings.wifiSettings[1].wifiSsid, "sdfdfdf");
 	strcpy(settings.wifiSettings[1].wifiPassword, "fdfsddf");

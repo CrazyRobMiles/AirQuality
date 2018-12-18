@@ -1,19 +1,14 @@
 #pragma once
 
-// tilt switch is across D2 and D1 on the Wemos D1 Mini
-// Note that using GPIO4 and GPIO0 D2 and D3 does not work. And it prevents program upload. 
-// Something special about GPIO0 it seems.
-// Using 4 and 5 works fine = 
 
-#define GROUND_PIN 5
-#define INPUT_PIN 4
+#define CONFIG_INPUT_PIN 2
 
 enum InputState { upright, inverted };
 
 InputState inputState;
 
 int lastInputValue;
-int inputDebounceCount;
+long inputDebounceStartTime;
 
 unsigned long millisAtLastInputChange;
 
@@ -35,7 +30,7 @@ void resetInputHandlers()
 	}
 }
 
-// bind an input handler to the box being inverted - returns true if the binding worked
+// bind an input handler to the box being inverted 
 // returns the number of the handler added or -1 if the add failed
 int addInputHandler(void(*boxInvertedHandler)(long millisSinceChange),
 	void(*boxUprightHandler)(long millisSinceChange))
@@ -85,17 +80,22 @@ void sendBoxUpright(long millisSinceChange)
 	}
 }
 
-#define INPUT_DEBOUNCE_LIMIT 200
+// number of milliseconds that the signal must be stable
+// before we read it
+
+#define INPUT_DEBOUNCE_TIME 100
+
+
 
 void setInputValue(int value)
 {
 	lastInputValue = value;
-	inputDebounceCount = 0;
+	inputDebounceStartTime = millis();
 
-	long currentMillis = millis();
-	long millisSinceChange = ulongDiff(currentMillis, millisAtLastInputChange);
+	ulong currentMillis = millis();
+	ulong millisSinceChange = ulongDiff(currentMillis, millisAtLastInputChange);
 
-	if (lastInputValue)
+	if (!lastInputValue)
 	{
 		inputState = inverted;
 		sendBoxInverted(millisSinceChange);
@@ -107,6 +107,36 @@ void setInputValue(int value)
 	}
 
 	millisAtLastInputChange = currentMillis;
+}
+
+// Reads the value and blocks until it gets a valid one
+void readInputValue()
+{
+	inputDebounceStartTime = millis();
+
+	int lastInputValue = digitalRead(CONFIG_INPUT_PIN);
+
+	while (true)
+	{
+		int newInputValue = digitalRead(CONFIG_INPUT_PIN);
+
+		if (newInputValue == lastInputValue)
+		{
+			long currentMillis = millis();
+			long millisSinceChange = ulongDiff(currentMillis, inputDebounceStartTime);
+
+			if (++millisSinceChange > INPUT_DEBOUNCE_TIME)
+			{
+				setInputValue(newInputValue);
+				break;
+			}
+		}
+		else
+		{
+			inputDebounceStartTime = millis();
+		}
+		delay(1);
+	}
 }
 
 void doTestInverted(long timeChange)
@@ -129,26 +159,27 @@ void bindTests()
 
 void setup_input()
 {
-	pinMode(GROUND_PIN, OUTPUT);
-	digitalWrite(GROUND_PIN, 0);
-	pinMode(INPUT_PIN, INPUT_PULLUP);
+	pinMode(CONFIG_INPUT_PIN, INPUT_PULLUP);
 	resetInputHandlers();
-	setInputValue(digitalRead(INPUT_PIN));
+	readInputValue();
 
 //	bindTests();
 }
 
 void loop_input()
 {
-	int newInputValue = digitalRead(INPUT_PIN);
+	int newInputValue = digitalRead(CONFIG_INPUT_PIN);
 
 	if (newInputValue == lastInputValue)
 	{
-		inputDebounceCount = 0;
+		inputDebounceStartTime = millis();
 	}
 	else
 	{
-		if (++inputDebounceCount > INPUT_DEBOUNCE_LIMIT)
+		long currentMillis = millis();
+		long millisSinceChange = ulongDiff(currentMillis, inputDebounceStartTime);
+
+		if (++millisSinceChange > INPUT_DEBOUNCE_TIME)
 		{
 			setInputValue(newInputValue);
 		}

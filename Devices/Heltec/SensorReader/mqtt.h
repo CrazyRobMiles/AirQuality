@@ -51,7 +51,8 @@ boolean send_to_mqtt()
 
 			// still regard the fix as valid - add lat and long to the message
 			sprintf(mqtt_send_buffer,
-				"{\"temp\":%.2f, \"humidity\" : %.2f, \"pressure\" : %.2f, \"PM10\" : %.2f, \"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+				"{\"dev\":\"%s\", \"temp\":%.2f, \"humidity\" : %.2f, \"pressure\" : %.2f, \"PM10\" : %.2f, \"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+				settings.mqttName,
 				pub_temp,
 				pub_humidity,
 				pub_pressure,
@@ -73,7 +74,8 @@ boolean send_to_mqtt()
 	// otherwise send the message with no location information
 
 	sprintf(mqtt_send_buffer,
-		"{\"temp\":%.2f, \"humidity\" : %.2f, \"pressure\" : %.2f, \"PM10\" : %.2f, \"PM25\" : %.2f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+		"{\"dev\":\"%s\",\"temp\":%.2f, \"humidity\" : %.2f, \"pressure\" : %.2f, \"PM10\" : %.2f, \"PM25\" : %.2f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+		settings.mqttName, 
 		pub_temp,
 		pub_humidity,
 		pub_pressure,

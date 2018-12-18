@@ -22,11 +22,13 @@ char mqtt_send_buffer[MQTT_SEND_BUFFER_SIZE];
 boolean send_buffer_to_mqtt(char * buffer)
 {
 	TRACELN("Sending to MQTT");
+
 	if (mqttState != ConnectedToMQTTServer)
 	{
 		TRACELN("MQTT not connected yet");
 		return false;
 	}
+
 	TRACELN(mqtt_send_buffer);
 
 	mqttPubSubClient.publish(settings.mqttPublishTopic, buffer);
@@ -46,8 +48,27 @@ boolean send_to_mqtt()
 			double longitude = pub_longitude_mdeg / 1000000.0;
 
 			// still regard the fix as valid - add lat and long to the message
+			//sprintf(mqtt_send_buffer,
+			//	"{\"dev\" : \"%s\", \"PM10\" : %.2f, \"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+			//	settings.mqttName,
+			//	pub_ppm_10,
+			//	pub_ppm_25,
+			//	latitude,
+			//	longitude,
+			//	dayNames[pub_day_of_week],
+			//	monthNames[pub_month],
+			//	pub_day,
+			//	pub_year,
+			//	pub_hour,
+			//	pub_minute,
+			//	pub_second);
 			sprintf(mqtt_send_buffer,
-				"{\"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+				"{\"dev\":\"%s\", \"temp\":%.2f, \"humidity\" : %.2f, \"pressure\" : %.2f, \"PM10\" : %.2f, \"PM25\" : %.2f, \"Lat\" : %.6f, \"Long\" : %.6f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+				settings.mqttName,
+				pub_temp,
+				pub_humidity,
+				pub_pressure,
+				pub_ppm_10,
 				pub_ppm_25,
 				latitude,
 				longitude,
@@ -64,8 +85,25 @@ boolean send_to_mqtt()
 
 	// otherwise send the message with no location information
 
+	//sprintf(mqtt_send_buffer,
+	//	"{\"dev\" : \"%s\", \"PM25\" : %.2f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+	//	settings.mqttName,
+	//	pub_ppm_25,
+	//	dayNames[pub_day_of_week],
+	//	monthNames[pub_month],
+	//	pub_day,
+	//	pub_year,
+	//	pub_hour,
+	//	pub_minute,
+	//	pub_second);
+
 	sprintf(mqtt_send_buffer,
-		"{\"PM25\" : %.2f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+		"{\"dev\":\"%s\",\"temp\":%.2f, \"humidity\" : %.2f, \"pressure\" : %.2f, \"PM10\" : %.2f, \"PM25\" : %.2f, \"timestamp\" : \"%s %s %d %d %02d:%02d:%02d GMT+0000\"}",
+		settings.mqttName,
+		pub_temp,
+		pub_humidity,
+		pub_pressure,
+		pub_ppm_10,
 		pub_ppm_25,
 		dayNames[pub_day_of_week],
 		monthNames[pub_month],
@@ -153,6 +191,7 @@ void loop_mqtt()
 	switch (mqttState)
 	{
 	case AwaitingWiFi:
+
 		if (wifiState == WiFiConnected)
 		{
 			// Start the MQTT connection running

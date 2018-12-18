@@ -2,7 +2,6 @@
 
 #include <Adafruit_NeoPixel.h>
 
-#define PIXELS 12
 #define VERSION 1
 
 #define NO_OF_VIRTUAL_PIXELS 12
@@ -12,9 +11,7 @@
 
 #define MILLIS_BETWEEN_UPDATES 20
 
-#define NEOPIN 2
-
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXELS, NEOPIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(12, NEOPIXEL_CONTOL_PIN, NEO_GRB + NEO_KHZ800);
 
 // All the brightness values are between 0 and 1
 // Scale them for the particular display
@@ -135,7 +132,7 @@ struct Pixel
 	byte r, g, b;
 };
 
-struct Pixel pixels[PIXELS];
+struct Pixel pixels[MAX_NO_OF_PIXELS];
 
 struct ColourValue {
 	float r, g, b;
@@ -168,7 +165,7 @@ struct ColourValue color_list[] =
 
 void clear_pixels()
 {
-	for (int i = 0; i < PIXELS; i++)
+	for (int i = 0; i < settings.noOfPixels; i++)
 	{
 		pixels[i].r = 0;
 		pixels[i].g = 0;
@@ -202,7 +199,7 @@ void renderVirtualPixel(VirtualPixel * lamp)
 
 	// Map the position value from 360 degrees to a pixel number
 
-	float pixel_pos = (lamp->factors[POSITION_FACTOR].factor_value / 360 * PIXELS);
+	float pixel_pos = (lamp->factors[POSITION_FACTOR].factor_value / 360 * settings.noOfPixels);
 
 	int pos = (int)(pixel_pos);
 
@@ -220,7 +217,7 @@ void renderVirtualPixel(VirtualPixel * lamp)
 	g = (byte)(lamp->factors[GREEN_FACTOR].factor_value * brightness * diff);
 	b = (byte)(lamp->factors[BLUE_FACTOR].factor_value * brightness * diff);
 
-	add_color_to_pixel((pos + 1) % PIXELS, strip.gamma8(r), strip.gamma8(g), strip.gamma8(b));
+	add_color_to_pixel((pos + 1) % settings.noOfPixels, strip.gamma8(r), strip.gamma8(g), strip.gamma8(b));
 
 }
 
@@ -235,7 +232,7 @@ void renderVirtualPixels(struct VirtualPixel * lamps)
 		renderVirtualPixel(&lamps[i]);
 	}
 
-	for (int i = 0; i < PIXELS; i++)
+	for (int i = 0; i < settings.noOfPixels; i++)
 	{
 		strip.setPixelColor(i, pixels[i].r, pixels[i].g, pixels[i].b);
 	}
@@ -318,7 +315,7 @@ void setupWalkingColour(ColourValue colour)
 	float start_speed = 0.5;
 	float speed_update = 0.125;
 
-	float degreesPerPixel = 360 / PIXELS;
+	float degreesPerPixel = 360 / settings.noOfPixels;
 
 	clearVirtualPixels(lamps);
 
@@ -378,7 +375,11 @@ void updateReadingDisplay()
 	//int airQHighAlertLimit; > airqHighWarnLimit
 
 	if (pub_ppm_25 < settings.airqLowLimit) {
-		fadeWalkingColor(lamps, color_list[GREEN_PIXEL_COLOUR], 100);
+		ColourValue baseValue;
+		baseValue.r = settings.pixel_red;
+		baseValue.g = settings.pixel_green;
+		baseValue.b = settings.pixel_blue;
+		fadeWalkingColor(lamps, baseValue, 100);
 		return;
 	}
 
@@ -488,7 +489,7 @@ void setPixelStatus(ColourValue colour, int noOfLights)
 		return;
 	}
 
-	float degreesPerPixel = 360 / PIXELS;
+	float degreesPerPixel = 360 / settings.noOfPixels;
 
 	noOfStatusLights = noOfLights;
 	statusColour = colour;
@@ -499,6 +500,7 @@ void setPixelStatus(ColourValue colour, int noOfLights)
 	{
 		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, i*degreesPerPixel, 0, 1.0);
 	}
+	renderVirtualPixels(lamps);
 }
 
 // force a reload of the status next time it is displayed
@@ -508,36 +510,34 @@ void resetPixelStatus()
 }
 
 
-void loopWifiSetupStatus()
-{
-	switch (wifiSetupState)
-	{
-	case WiFiSetupOff:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 1);
-		break;
-	case WiFiSetupAwaitingClients:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 2);
-		break;
-	case WiFiSetupServingPage:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 3);
-		break;
-	case WiFiSetupProcessingResponse:
-		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 4);
-		break;
-	}
-}
-
 // A status display shows a number of pixels of a particular colour
 // The status display is used by the Wifi and by the setup
-void loopPixelsStatus()
+void displayPixelStatus()
 {
 	switch (wifiState)
 	{
+	case WiFiSetupAwaitingClients:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 1);
+		break;
+
+	case WiFiSetupServingPage:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 2);
+		break;
+
+	case WiFiSetupProcessingResponse:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 3);
+		break;
+
+	case WiFiSetupDone:
+		setPixelStatus(color_list[MAGENTA_PIXEL_COLOUR], 4);
+		break;
+
 	case WiFiStarting:
 		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 1);
 		break;
 
 	case WiFiScanning:
+	case WiFiWaitingForNextScan:
 		setPixelStatus(color_list[BLUE_PIXEL_COLOUR], 2);
 		break;
 
@@ -585,20 +585,16 @@ void loopPixelsStatus()
 		setPixelStatus(color_list[RED_PIXEL_COLOUR], 1);
 		break;
 	}
-
 }
 
-void loop_pixels()
+void pixel_update()
 {
 	switch (deviceState)
 	{
 	case wifiSetup:
-		loopWifiSetupStatus();
-		break;
-
 	case starting:
 	case showStatus:
-		loopPixelsStatus();
+		displayPixelStatus();
 		break;
 
 	case active:
@@ -608,14 +604,38 @@ void loop_pixels()
 	updatePixelDisplay();
 }
 
-void setup_pixels()
+
+void empty_pixel_update()
 {
-	strip.begin();
-	strip.show(); // Initialize all pixels to 'off'
-	clearVirtualPixels(lamps);
-	millisOfLastUpdate = millis();
-	pixel_animation_update = updateWalkingColor;
-	resetPixelStatus();
+
 }
 
+void(*active_pixel_loop) ();
+
+void setup_pixels()
+{
+	TRACE("No of pixels: ");
+	TRACELN(settings.noOfPixels);
+
+	if (settings.noOfPixels == 0)
+	{
+		active_pixel_loop = empty_pixel_update;
+	}
+	else
+	{
+		active_pixel_loop = pixel_update;
+//		strip = 
+		strip.begin();
+		strip.show(); // Initialize all pixels to 'off'
+		clearVirtualPixels(lamps);
+		millisOfLastUpdate = millis();
+		pixel_animation_update = updateWalkingColor;
+		resetPixelStatus();
+	}
+}
+
+void loop_pixels()
+{
+	active_pixel_loop();
+}
 

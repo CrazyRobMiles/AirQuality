@@ -7,8 +7,6 @@
 #define READING_COMMAND 0xC0
 #define READING_LENGTH 9
 
-SoftwareSerial SensorSerial(12, 13, false, 128);
-
 enum Zpho1_sensor_state {zph01_waiting_for_start, zph01_loading_block};
 
 Zpho1_sensor_state zph01_sensor_state;

@@ -63,7 +63,19 @@
     <ClInclude Include="stateManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WiFiConfig.h">
+    <ClInclude Include="SDS011.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AirQSensor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bme280.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GPS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="power.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

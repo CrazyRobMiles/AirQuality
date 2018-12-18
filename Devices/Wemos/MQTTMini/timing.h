@@ -79,9 +79,10 @@ void setup_timing()
 
 void loop_timing()
 {
-	if (pub_air_values_ready )
+	if (pub_air_values_ready && pub_bme_values_ready)
 	{
 		readings_ready();
 		pub_air_values_ready = false;
+		pub_bme_values_ready = false;
 	}
 }

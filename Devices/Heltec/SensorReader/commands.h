@@ -3,7 +3,7 @@
 // used from timing.h
 void setup_timing();
 
-#define EEPROM_SIZE 1000
+#define EEPROM_SIZE 2000
 #define SETTINGS_EEPROM_OFFSET 0
 
 #define WORKED_OK 0
@@ -410,7 +410,6 @@ int checkTargetDeviceName(JsonObject& root)
 }
 
 // request: {"v":1, "t" : "Sensor01", "c" : "mqtt", "o" : "send"}
-// return : { 
 void do_send_mqtt(JsonObject& root, char * resultBuffer)
 {
 	int reply = checkTargetDeviceName(root);
@@ -553,6 +552,7 @@ void do_mqtt_publish_location(JsonObject& root, char * resultBuffer)
 		}
 
 		reply = decodeStringValue(settings.mqttPublishTopic, root, "val", MQTT_PUBLISH_TOPIC_LENGTH - 1);
+
 		if (reply == WORKED_OK)
 		{
 			save_settings();
@@ -602,7 +602,7 @@ void do_mqtt_device_id(JsonObject& root, char * resultBuffer)
 			return;
 		}
 
-		reply = decodeStringValue(settings.mqttName, root, "loc", MQTT_DEVICE_NAME_LENGTH - 1);
+		reply = decodeStringValue(settings.mqttName, root, "val", MQTT_DEVICE_NAME_LENGTH - 1);
 		if (reply == WORKED_OK)
 		{
 			save_settings();
@@ -629,6 +629,32 @@ void do_mqtt_host(JsonObject& root, char * resultBuffer)
 		}
 
 		reply = decodeStringValue(settings.mqttServer, root, "val", MQTT_SERVER_NAME_LENGTH - 1);
+		if (reply == WORKED_OK)
+		{
+			save_settings();
+		}
+	}
+
+	build_command_reply(reply, root, resultBuffer);
+}
+
+
+// {"v":1, "t" : "sensor01", "c" : "mqtt", "o" : "user", "val":"username" }
+void do_mqtt_user(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		const char * option = root["val"];
+
+		if (!option)
+		{
+			build_text_value_command_reply(WORKED_OK, settings.mqttUser, root, resultBuffer);
+			return;
+		}
+
+		reply = decodeStringValue(settings.mqttUser, root, "val", MQTT_USER_NAME_LENGTH - 1);
 		if (reply == WORKED_OK)
 		{
 			save_settings();
@@ -704,6 +730,7 @@ OptionDecodeItems mqttOptionDecodeItems[] = {
 	{"publish", do_mqtt_publish_location},
 	{"subscribe", do_mqtt_subscribe_location},
 	{"id", do_mqtt_device_id},
+	{"user", do_mqtt_user},
 	{"pwd", do_mqtt_password},
 	{"host", do_mqtt_host},
 	{"port", do_mqtt_port}
@@ -1081,13 +1108,49 @@ void do_node_version(JsonObject& root, char * resultBuffer)
 	build_command_reply(WORKED_OK, root, resultBuffer + length);
 }
 
-// {"v":1, "c" : "node", "o" : "devname"}
-void do_device_name(JsonObject& root, char * resultBuffer)
+// {"v":1, "c" : "node", "o" : "getdevname"}
+void do_get_device_name(JsonObject& root, char * resultBuffer)
 {
 	TRACELN("Getting device name");
-	int length = sprintf(resultBuffer, "{\"nodename\":%s,", settings.deviceNane);
 
+	int length = sprintf(resultBuffer, "{\"nodename\":\"%s\",", settings.deviceNane);
 	build_command_reply(WORKED_OK, root, resultBuffer + length);
+}
+
+// {"v":1, "t" : "sensor01", "c" : "node", "o" : "reset"}
+void do_reset(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		ESP.restart();
+	}
+}
+
+// {"v":1, "t" : "sensor01", "c" : "node", "o" : "devname", "val":"sensor01"}
+void do_device_name(JsonObject& root, char * resultBuffer)
+{
+	int reply = checkTargetDeviceName(root);
+
+	if (reply == WORKED_OK)
+	{
+		const char * option = root["val"];
+
+		if (!option)
+		{
+			build_text_value_command_reply(WORKED_OK, settings.deviceNane, root, resultBuffer);
+			return;
+		}
+
+		reply = decodeStringValue(settings.deviceNane, root, "val", DEVICE_NAME_LENGTH - 1);
+		if (reply == WORKED_OK)
+		{
+			save_settings();
+		}
+	}
+
+	build_command_reply(reply, root, resultBuffer);
 }
 
 // declared in menu.h and used to refresh the menu display
@@ -1200,6 +1263,8 @@ void do_pixel_colour(JsonObject& root, char * resultBuffer)
 
 OptionDecodeItems nodeOptionDecodeItems[] = {
 	{"ver", do_node_version},
+	{"getdevname", do_get_device_name},
+	{"reset", do_reset },
 	{"devname", do_device_name},
 	{"spltop", do_splash_screen_top_line },
 	{"splbtm", do_splash_screen_bottom_line },
@@ -1263,7 +1328,8 @@ void actOnCommand(const char * command, const char * option, JsonObject& root, c
 void abort_json_command(int error, JsonObject& root, void(*deliverResult) (char * resultText))
 {
 	build_command_reply(error, root, command_reply_buffer);
-	strcat(command_reply_buffer, "}");
+	// append the version number to the invalid command message
+	strcat(command_reply_buffer, ",\"v\":1}");
 	deliverResult(command_reply_buffer);
 }
 
@@ -1409,7 +1475,7 @@ void reset_settings()
 	strcpy(settings.mqttUser, "sdfsdf");
 	strcpy(settings.mqttPassword, "sdfsdsdf");
 	strcpy(settings.mqttName, "Sensor01");
-	strcpy(settings.mqttPublishTopic, "sensor01/data");
+	strcpy(settings.mqttPublishTopic, "sensor01/datazump");
 	strcpy(settings.mqttSubscribeTopic, "sensor01/commands");
 
 #endif

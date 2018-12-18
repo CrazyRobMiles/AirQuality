@@ -1,25 +1,12 @@
 #pragma once
 
-#define STARTUP_STATE_TIME 10000
+#define STARTUP_STATE_TIME 20000
 
 unsigned long millisAtStartup;
-
-void setWifiSetupState()
-{
-	startWifiConfig();
-	deviceState = wifiSetup;
-	resetPixelStatus();
-}
 
 void setShowStatusState()
 {
 	deviceState = showStatus;
-	resetPixelStatus();
-}
-
-void setStartingState()
-{
-	deviceState = starting;
 	resetPixelStatus();
 }
 
@@ -41,13 +28,19 @@ void doManageUpright(long timeChange)
 
 void setup_StateManager()
 {
+	readInputValue();
+
 	if (inputState == inverted)
 	{
-		setWifiSetupState();
+		startWifiSetup();
+		deviceState = wifiSetup;
+		resetPixelStatus();
 	}
 	else
 	{
-		setStartingState();
+		startWifi();
+		deviceState = starting;
+		resetPixelStatus();
 	}
 
 	millisAtStartup = millis();

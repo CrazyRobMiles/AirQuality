@@ -1,6 +1,5 @@
 #pragma once
 
-
 void start_action(String title, String text)
 {
 	TRACE("Start action: ");

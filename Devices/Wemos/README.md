@@ -10,8 +10,8 @@ The connections to the Wemos are as follows (the D values are the pins as labell
 | ----------:|-------------:|-------------:|-------------:|
 | I2c SCL    |D1|GPIO5|Wemos default
 | I2c SDA   |D2|GPIO4|Wemos default
-| Config switch|D4|GPIO2|inputSwitch.h
-| Power control|D5|GPIO14|power.h
+| Power control|D4|GPIO2|power.h
+| Config switch|D5|GPIO14|shared.h
 | Air Quality sensor serial RX|D6|GPIO12|shared.h
 | GPS Receiver serial RX|D7|GPIO13|shared.h
 | NeoPixel control|D8|GPIO15|PixelControl.h
@@ -50,6 +50,8 @@ Sensor status information is displayed for 20 seconds after power on and whenver
 When in access point configuration mode the device will function as a WiFi access point. A WiFi client can connect to this access point and enter configuration information onto a web form. When the web form is submitted to the device the settings are validated and stored within the device which can then be rebooted (turned off and on again) to activate the new settings. 
 
 To connect to the device, use your PC, Smartphone or tablet to find a local access point with a name that starts "MQTTmini". Connect to this and then browse to "http://192.168.4.1". A web form is displayed in which you can set the WiFi and MQTT configuration for the device. Press the submit button on the form to submit the form and store the settings. 
+
+
 
 
 

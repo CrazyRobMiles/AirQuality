@@ -1,8 +1,5 @@
 #pragma once
 
-
-#define CONFIG_INPUT_PIN 2
-
 enum InputState { upright, inverted };
 
 InputState inputState;

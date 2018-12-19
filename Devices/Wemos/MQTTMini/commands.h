@@ -863,8 +863,6 @@ void do_node_version(JsonObject& root, char * resultBuffer)
 {
 	TRACELN("Getting version");
 	int length = sprintf(resultBuffer, "{\"version\":%d,", settings.version);
-
-
 	build_command_reply(WORKED_OK, root, resultBuffer + length);
 }
 

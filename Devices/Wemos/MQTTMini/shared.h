@@ -6,10 +6,10 @@
 
 // These pins are used by other modules
 // Used in power.h
-#define POWER_CONTROL_PIN 14
+#define POWER_CONTROL_PIN 2
 
 // Used in inputSwitch.h
-#define CONFIG_INPUT_PIN 2
+#define CONFIG_INPUT_PIN 14
 
 // Used in PixelControl.h
 #define NEOPIXEL_CONTOL_PIN 15

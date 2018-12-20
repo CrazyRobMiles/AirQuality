@@ -6,7 +6,6 @@ void updateReadingDisplay(float reading);
 // from mqtt.h
 boolean send_to_mqtt();
 
-
 unsigned long mqtt_reading_retry_interval_in_millis;
 unsigned long mqtt_reading_interval_in_millis;
 unsigned long milliseconds_at_last_mqtt_update;
@@ -35,13 +34,14 @@ unsigned long time_to_next_mqtt_update()
 		return mqtt_reading_interval_in_millis - millis_since_last_mqtt_update;
 }
 
+// called when we have all the readings ready
+
 void readings_ready()
 {
 	if (settings.mqtt_enabled)
 	{
 		unsigned long time_in_millis = millis();
 		unsigned long millis_since_last_mqtt_update = ulongDiff(time_in_millis, milliseconds_at_last_mqtt_update);
-
 
 		if (millis_since_last_mqtt_update > mqtt_reading_interval_in_millis)
 		{

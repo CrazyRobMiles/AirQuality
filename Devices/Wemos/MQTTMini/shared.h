@@ -25,7 +25,6 @@
 SoftwareSerial SensorSerial(AIRQ_SERIAL_RX, -1, false, 128);
 SoftwareSerial GPS_Serial(GPS_SERIAL_RX, -1, false, 128);
 
-
 enum DeviceStates { starting, wifiSetup, showStatus, active};
 
 // Sensor settings
@@ -33,6 +32,9 @@ enum DeviceStates { starting, wifiSetup, showStatus, active};
 #define ZPH01_SENSOR 2
 #define MIN_AIRQ_SENSOR_NO 1
 #define MAX_AIRQ_SENSOR_NO 2
+
+// I2C address of the BME 280 sensor
+#define BME280_I2C_ADDRESS 0x76
 
 // Pixel display settings
 #define MAX_NO_OF_PIXELS 64
@@ -143,13 +145,6 @@ long pub_longitude_mdeg;
 unsigned long pub_ticks_at_last_gps_update;
 bool pub_got_gps_fix;
 #define MILLIS_LIFETIME_OF_GPS_FIX 30000
-
-// Used by timing.h
-uint32_t pub_millis_at_next_update;
-
-// The number of millis to the next update - if 0 or negative
-// it means that a reading is due - updated by timing.h
-int32_t pub_millis_to_next_update;
 
 char * dayNames[] = { "", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 

@@ -22,20 +22,20 @@ void message_error(String message)
 	TRACELN(message);
 }
 
+
 void process_readings(float ppm25, float ppm10)
 {
-	TRACE("PPM 2.5:");
-	TRACELN(ppm25);
-	TRACE("PPM 10:");
-	TRACELN(ppm10);
+	if (first_airq_reading)
+	{
+		Serial.println("Got first reading from SDS011");
+		Serial.print("PPM 2.5:");
+		Serial.println(ppm25);
+		Serial.print("PPM 10:");
+		Serial.println(ppm10);
+		first_airq_reading = false;
+	}
 
 	// Only update the reading value if we are processing
-
-	if (pub_air_values_ready)
-		return;
-
-	if (pub_millis_to_next_update > 0)
-		return;
 
 	pub_ppm_10 = ppm10;
 	pub_ppm_25 = ppm25;
@@ -381,7 +381,7 @@ void set_sensor_working(bool working)
 
 void setup_sds011()
 {
-	TRACELN("Setting up Sensor");
+	Serial.println("Using SDS011 air quality sensor");
 
 	SensorSerial.begin(9600);
 	reset_message();

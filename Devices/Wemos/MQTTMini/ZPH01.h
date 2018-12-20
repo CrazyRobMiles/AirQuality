@@ -45,6 +45,14 @@ void zph01_pump_byte(byte b)
 			{
 				// Got a valid value
 				pub_ppm_25 = sensorBuffer[2] + sensorBuffer[2] / 10.0;
+				if (first_airq_reading)
+				{
+					Serial.println("Got first reading from ZPH01");
+					Serial.print("PPM 2.5:");
+					Serial.println(pub_ppm_25);
+					first_airq_reading = false;
+				}
+
 				pub_air_values_ready = true;
 			}
 			else
@@ -66,6 +74,7 @@ void zph01_pump_byte(byte b)
 
 void setup_zph01()
 {
+	Serial.println("Using ZPH01 air quality sensor");
 	SensorSerial.begin(9600);
 	zph01_sensor_state = zph01_waiting_for_start;
 }

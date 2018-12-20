@@ -28,72 +28,80 @@
 #define SEALEVELPRESSURE_HPA (1013.25)
 
 Adafruit_BME280 bme; // I2C
-//Adafruit_BME280 bme(BME_CS); // hardware SPI
-//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 
-enum Bme280_sensor_state { bme280_starting, bme280_active};
+enum Bme280_sensor_state { bme280_disconnected, bme280_active };
 
 Bme280_sensor_state bme280_sensor_state;
 
-unsigned long delayTime;
-
-void setup_bme280() 
+void printBMEValues() 
 {
-	bme280_sensor_state = bme280_starting;
+
+	switch (bme280_sensor_state)
+	{
+
+	case bme280_disconnected:
+		Serial.println("BME 280 sensor not connected");
+
+	case bme280_active:
+		Serial.print("Temperature = ");
+		Serial.print(bme.readTemperature());
+		Serial.println(" *C");
+
+		Serial.print("Pressure = ");
+
+		Serial.print(bme.readPressure() / 100.0F);
+		Serial.println(" hPa");
+
+		Serial.print("Approx. Altitude = ");
+		Serial.print(bme.readAltitude(SEALEVELPRESSURE_HPA));
+		Serial.println(" m");
+
+		Serial.print("Humidity = ");
+		Serial.print(bme.readHumidity());
+		Serial.println(" %");
+
+		Serial.println();
+	}
+}
+
+void setup_bme280()
+{
+	if (bme.begin(BME280_I2C_ADDRESS))
+	{
+		bme280_sensor_state = bme280_active;
+		Serial.println("BME 280 connected");
+	}
+	else
+	{
+		bme280_sensor_state = bme280_disconnected;
+		TRACELN("BME 280 setup failed");
+	}
+
+	printBMEValues();
 
 	pub_bme_values_ready = false;
 }
 
-
-void printBMEValues() {
-	TRACE("Temperature = ");
-	TRACE(bme.readTemperature());
-	TRACELN(" *C");
-
-	TRACE("Pressure = ");
-
-	TRACE(bme.readPressure() / 100.0F);
-	TRACELN(" hPa");
-
-	TRACE("Approx. Altitude = ");
-	TRACE(bme.readAltitude(SEALEVELPRESSURE_HPA));
-	TRACELN(" m");
-
-	TRACE("Humidity = ");
-	TRACE(bme.readHumidity());
-	TRACELN(" %");
-
-	TRACELN();
-}
-
-void loop_bme280() 
+void loop_bme280()
 {
-	switch(bme280_sensor_state)
+	switch (bme280_sensor_state)
 	{
-		case bme280_starting:
 
-		if(bme.begin(0x76))
-		{
-			bme280_sensor_state = bme280_active;
-			TRACELN("Done setting up BME 280");
-		}
+	case bme280_disconnected:
 
 		break;
 
-		case bme280_active:
-
-		if (pub_bme_values_ready)
-			return;
-
-		if (pub_millis_to_next_update > 0)
-			return;
+	case bme280_active:
 
 		pub_temp = bme.readTemperature();
 		pub_pressure = bme.readPressure() / 100.0F;
 		pub_humidity = bme.readHumidity();
+
 		pub_bme_values_ready = true;
 
 		break;
 	}
 }
+
+
 

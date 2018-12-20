@@ -1,4 +1,7 @@
 #pragma once
+
+bool first_airq_reading = true;
+
 #include "ZPH01.h"
 #include "SDS011.h"
 

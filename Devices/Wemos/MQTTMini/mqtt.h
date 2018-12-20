@@ -19,14 +19,21 @@ char mqtt_receive_buffer[MQTT_RECEIVE_BUFFER_SIZE];
 
 char mqtt_send_buffer[MQTT_SEND_BUFFER_SIZE];
 
+boolean first_mqtt_message = true;
+
 boolean send_buffer_to_mqtt(char * buffer)
 {
-	TRACELN("Sending to MQTT");
-
 	if (mqttState != ConnectedToMQTTServer)
 	{
 		TRACELN("MQTT not connected yet");
 		return false;
+	}
+
+	if (first_mqtt_message)
+	{
+		Serial.println("Sending first MQTT message");
+		Serial.println(buffer);
+		first_mqtt_message = false;
 	}
 
 	TRACELN(mqtt_send_buffer);

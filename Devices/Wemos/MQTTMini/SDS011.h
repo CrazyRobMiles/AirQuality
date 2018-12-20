@@ -107,6 +107,16 @@ void process_reading()
 
 	float ppm_10 = ((int)message_text[4] + ((int)message_text[5] * 256)) / 10.0;
 	float ppm_25 = ((int)message_text[2] + ((int)message_text[3] * 256)) / 10.0;
+
+	if (first_airq_reading)
+	{
+		Serial.println("Got first reading from SDS011");
+		Serial.print("PPM 2.5:");
+		Serial.println(pub_ppm_25);
+		Serial.print("PPM 10:");
+		Serial.println(pub_ppm_10);
+		first_airq_reading = false;
+	}
 	process_readings(ppm_25, ppm_10);
 }
 
@@ -386,7 +396,7 @@ void setup_sds011()
 	SensorSerial.begin(9600);
 	reset_message();
 	pub_air_values_ready = false;
-	set_reporting_mode(true);
+//	set_reporting_mode(true);
 }
 
 void loop_sds011()

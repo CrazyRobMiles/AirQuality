@@ -11,7 +11,7 @@
 
 #define MILLIS_BETWEEN_UPDATES 20
 
-Adafruit_NeoPixel strip = Adafruit_NeoPixel(12, NEOPIXEL_CONTOL_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(12, NEOPIXEL_CONTROL_PIN, NEO_GRB + NEO_KHZ800);
 
 // All the brightness values are between 0 and 1
 // Scale them for the particular display

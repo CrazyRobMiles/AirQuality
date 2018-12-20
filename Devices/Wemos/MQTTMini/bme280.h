@@ -64,20 +64,24 @@ void printBMEValues()
 	}
 }
 
-void setup_bme280()
+void checkBme280()
 {
 	if (bme.begin(BME280_I2C_ADDRESS))
 	{
 		bme280_sensor_state = bme280_active;
 		Serial.println("BME 280 connected");
+		printBMEValues();
 	}
 	else
 	{
 		bme280_sensor_state = bme280_disconnected;
-		TRACELN("BME 280 setup failed");
+		Serial.println("BME 280 setup failed");
 	}
+}
 
-	printBMEValues();
+void setup_bme280()
+{
+	checkBme280();
 
 	pub_bme_values_ready = false;
 }
@@ -88,7 +92,6 @@ void loop_bme280()
 	{
 
 	case bme280_disconnected:
-
 		break;
 
 	case bme280_active:

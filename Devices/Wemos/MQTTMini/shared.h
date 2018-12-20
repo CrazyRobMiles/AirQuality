@@ -12,7 +12,7 @@
 #define CONFIG_INPUT_PIN 14
 
 // Used in PixelControl.h
-#define NEOPIXEL_CONTOL_PIN 15
+#define NEOPIXEL_CONTROL_PIN 15
 
 // Used to define the pin to receive serial data from the Air Quality sensor
 #define AIRQ_SERIAL_RX 12

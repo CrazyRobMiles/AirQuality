@@ -163,17 +163,17 @@ void dump_unsigned_long(char * dest, u4_t value)
 
 void dump_settings()
 {
-	TRACE("Version: "); TRACELN(settings.version);
-	TRACE("Device name: "); TRACELN(settings.deviceNane);
-	TRACE("MQTT server: "); TRACELN(settings.mqttServer);
-	TRACE("MQTT port: "); TRACELN(settings.mqttPort);
-	TRACE("MQTT user: "); TRACELN(settings.mqttUser);
-	TRACE("MQTT password: "); TRACELN(settings.mqttPassword);
-	TRACE("MQTT device name: "); TRACELN(settings.mqttName);
-	TRACE("MQTT publish topic: "); TRACELN(settings.mqttPublishTopic);
-	TRACE("MQTT subscribe topic: "); TRACELN(settings.mqttSubscribeTopic);
-	TRACE("MQTT seconds per update: "); TRACELN(settings.seconds_per_mqtt_update);
-	TRACE("MQTT enabled: "); TRACELN(settings.mqtt_enabled);
+	Serial.print("Version: "); Serial.println(settings.version);
+	Serial.print("Device name: "); Serial.println(settings.deviceNane);
+	Serial.print("MQTT server: "); Serial.println(settings.mqttServer);
+	Serial.print("MQTT port: "); Serial.println(settings.mqttPort);
+	Serial.print("MQTT user: "); Serial.println(settings.mqttUser);
+	Serial.print("MQTT password: "); Serial.println(settings.mqttPassword);
+	Serial.print("MQTT device name: "); Serial.println(settings.mqttName);
+	Serial.print("MQTT publish topic: "); Serial.println(settings.mqttPublishTopic);
+	Serial.print("MQTT subscribe topic: "); Serial.println(settings.mqttSubscribeTopic);
+	Serial.print("MQTT seconds per update: "); Serial.println(settings.seconds_per_mqtt_update);
+	Serial.print("MQTT enabled: "); Serial.println(settings.mqtt_enabled);
 }
 
 void writeBytesToEEPROM ( byte * bytesToStore, int address, int length)
@@ -208,7 +208,7 @@ void save_settings()
 
 	writeBytesToEEPROM(settingPtr, SETTINGS_EEPROM_OFFSET, sizeof(Device_Settings));
 
-	dump_settings();
+//	dump_settings();
 }
 
 void load_settings()
@@ -1348,6 +1348,7 @@ void reset_settings()
 
 	settings.seconds_per_mqtt_update = SECONDS_PER_MQTT_UPDATE;
 	settings.seconds_per_mqtt_retry = SECONDS_PER_MQTT_RETRY;
+	settings.mqtt_enabled = true;
 
 	// You can put default settings here
 	// These are copied into the device when it is first started
@@ -1467,6 +1468,49 @@ void check_serial_buffer()
 			}
 		}
 	}
+}
+
+void loadCommandsFromTerminal()
+{
+	char devName[80];
+
+	Serial.setTimeout(600000);
+
+	sprintf(devName, "%s %06X", DEV_NAME_PREFIX, ESP.getChipId());
+
+	Serial.printf("Device name: %s\n", devName);
+
+	Serial.println("Initial Setup");
+
+	for (int i = 0; i < sizeof(settingItems) / sizeof(struct SettingItem); i++)
+	{
+		if (settingItems[i].isPassword)
+		{
+			Serial.printf("Setting %s\nEnter setting (blank to leave unchanged): ",
+				settingItems[i].prompt);
+		}
+		else
+		{
+			Serial.printf("Setting %s current value: %s\nEnter setting (blank to leave unchanged): ",
+				settingItems[i].prompt, settingItems[i].value);
+		}
+
+		char inputBuffer[MAX_SETTING_LENGTH];
+
+		int length = Serial.readBytesUntil('\n', inputBuffer, MAX_SETTING_LENGTH - 1);
+		
+		if (length > 0)
+		{
+			inputBuffer[length] = 0;
+			strcpy(settingItems[i].value, inputBuffer);
+		}
+
+		Serial.println();
+	}
+
+	Serial.println("Settings");
+
+	dump_settings();
 }
 
 void setup_commands()

@@ -33,9 +33,6 @@ enum DeviceStates { starting, wifiSetup, showStatus, active};
 #define MIN_AIRQ_SENSOR_NO 1
 #define MAX_AIRQ_SENSOR_NO 2
 
-// I2C address of the BME 280 sensor
-#define BME280_I2C_ADDRESS 0x76
-
 // Pixel display settings
 #define MAX_NO_OF_PIXELS 64
 
@@ -54,6 +51,8 @@ DeviceStates deviceState;
 #define MQTT_PUBLISH_TOPIC_LENGTH 100
 #define MQTT_SUBSCRIBE_TOPIC_LENGTH 100
 
+#define MAX_SETTING_LENGTH 300
+
 struct WiFi_Setting
 {
 	char wifiSsid[WIFI_SSID_LENGTH];
@@ -67,7 +66,7 @@ struct Device_Settings
 	char deviceNane[DEVICE_NAME_LENGTH];
 
 	WiFi_Setting wifiSettings[NO_OF_WIFI_SETTINGS];
-	bool wiFiOn = true;
+	bool wiFiOn;
 	char mqttServer[MQTT_SERVER_NAME_LENGTH];
 	int mqttPort;
 	char mqttUser[MQTT_USER_NAME_LENGTH];
@@ -78,7 +77,7 @@ struct Device_Settings
 
 	int seconds_per_mqtt_update;
 	int seconds_per_mqtt_retry;
-	boolean mqtt_enabled = true;
+	boolean mqtt_enabled;
 
 	int airqSensorType;
 
@@ -92,11 +91,40 @@ struct Device_Settings
 	float pixel_red;
 	float pixel_green;
 	float pixel_blue;
-
 	byte checkByte2;
 };
 
 struct Device_Settings settings;
+
+struct SettingItem {
+	char * prompt;
+	char * formName;
+	char * value;
+	int maxLength;
+	bool isPassword;
+};
+
+#define DEV_NAME_PREFIX "MQTTMini"
+
+struct SettingItem settingItems[] =
+{
+	"WiFiSSID1: ", "wifissid1", settings.wifiSettings[0].wifiSsid, WIFI_SSID_LENGTH, false,
+	"WiFiPassword1: ", "wifipwd1", settings.wifiSettings[0].wifiPassword, WIFI_PASSWORD_LENGTH, true,
+	"WiFiSSID2: ", "wifissid2", settings.wifiSettings[1].wifiSsid, WIFI_SSID_LENGTH, false,
+	"WiFiPassword2: ", "wifipwd2", settings.wifiSettings[1].wifiPassword, WIFI_PASSWORD_LENGTH, true,
+	"WiFiSSID3: ", "wifissid3", settings.wifiSettings[2].wifiSsid, WIFI_SSID_LENGTH, false,
+	"WiFiPassword3: ", "wifipwd3", settings.wifiSettings[2].wifiPassword, WIFI_PASSWORD_LENGTH, true,
+	"WiFiSSID4: ", "wifissid4", settings.wifiSettings[3].wifiSsid, WIFI_SSID_LENGTH, false,
+	"WiFiPassword4: ", "wifipwd4", settings.wifiSettings[3].wifiPassword, WIFI_PASSWORD_LENGTH, true,
+	"WiFiSSID5: ", "wifissid5", settings.wifiSettings[4].wifiSsid, WIFI_SSID_LENGTH, false,
+	"WiFiPassword5: ", "wifipwd5", settings.wifiSettings[4].wifiPassword, WIFI_PASSWORD_LENGTH, true,
+	"MQTT DeviceName: ", "mname", settings.mqttName, MQTT_DEVICE_NAME_LENGTH, false,
+	"MQTT Host: ", "mhost", settings.mqttServer, MQTT_SERVER_NAME_LENGTH, false,
+	"MQTT UserName: ", "muser", settings.mqttUser, MQTT_USER_NAME_LENGTH, false,
+	"MQTT Password: ", "mpwd", settings.mqttPassword, MQTT_PASSWORD_LENGTH, true,
+	"MQTT Publish topic: ", "mpub", settings.mqttPublishTopic, MQTT_PUBLISH_TOPIC_LENGTH, false,
+	"MQTT Subscribe topic: ", "msub", settings.mqttSubscribeTopic, MQTT_SUBSCRIBE_TOPIC_LENGTH, false
+};
 
 enum WiFiState { WiFiOff, WiFiStarting, WiFiScanning, WiFiWaitingForNextScan, WiFiConnecting, WiFiConnected, ShowingWifiConnected, WiFiConnectFailed, WiFiNotConnected,
 	WiFiSetupStarting, WiFiSetupOff, WiFiSetupAwaitingClients, WiFiSetupServingPage, WiFiSetupProcessingResponse, WiFiSetupDone };
@@ -136,7 +164,7 @@ boolean pub_bme_values_ready;
 
 // Used bymqtt.h and timing.h
 bool pub_mqtt_force_send;
-#define SECONDS_PER_MQTT_UPDATE 10
+#define SECONDS_PER_MQTT_UPDATE 300
 #define SECONDS_PER_MQTT_RETRY 1
 
 // Set by WiFiGPS.h

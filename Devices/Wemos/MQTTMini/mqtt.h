@@ -150,8 +150,51 @@ void callback(char* topic, byte* payload, unsigned int length)
 	act_onJson_command(mqtt_receive_buffer, mqtt_deliver_command_result);
 }
 
+void send_to_mqtt_with_retry()
+{
+	if (send_to_mqtt())
+	{
+		mqtt_reading_interval_in_millis = settings.seconds_per_mqtt_update * 1000;
+	}
+	else
+	{
+		mqtt_reading_interval_in_millis = settings.seconds_per_mqtt_retry * 1000;
+	}
+}
+
+void do_mqtt_send()
+{
+	if (settings.mqtt_enabled)
+	{
+		unsigned long time_in_millis = millis();
+		unsigned long millis_since_last_mqtt_update = ulongDiff(time_in_millis, milliseconds_at_last_mqtt_update);
+
+		if (millis_since_last_mqtt_update > mqtt_reading_interval_in_millis)
+		{
+			// handle any lag to make sure that timings don't drift
+			unsigned long time_to_update = millis_since_last_mqtt_update - mqtt_reading_interval_in_millis;
+			// set the time of the update to allow for any delay
+			milliseconds_at_last_mqtt_update = time_in_millis - time_to_update;
+			send_to_mqtt_with_retry();
+		}
+	}
+	else
+	{
+		Serial.println("MQTT not sent - MQTT turned off");
+	}
+
+	if (pub_mqtt_force_send)
+	{
+		if (send_to_mqtt())
+		{
+			pub_mqtt_force_send = false;
+		}
+	}
+}
+
 void setup_mqtt()
 {
+	pub_mqtt_force_send = false;
 	mqttState = AwaitingWiFi;
 }
 
@@ -171,6 +214,7 @@ void mqtt_connected()
 	update_action(settings.mqttName, "Connected OK");
 	mqttPubSubClient.subscribe(settings.mqttSubscribeTopic);
 	mqttState = ShowingConnectedToMQTTServer;
+	pub_mqtt_force_send = true;
 }
 
 void attempt_mqtt_connect()

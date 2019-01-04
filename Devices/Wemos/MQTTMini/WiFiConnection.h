@@ -20,34 +20,6 @@ unsigned long wifi_timer_start;
 std::unique_ptr<DNSServer> dnsServer;
 const byte DNS_PORT = 53;
 
-struct SettingItem {
-	char * prompt;
-	char * formName;
-	char * value;
-	bool isPassword;
-};
-
-struct SettingItem settingItems[] =
-{
-	"WiFiSSID1: ", "wifissid1", settings.wifiSettings[0].wifiSsid, false,
-	"WiFiPassword1: ", "wifipwd1", settings.wifiSettings[0].wifiPassword, true,
-	"WiFiSSID2: ", "wifissid2", settings.wifiSettings[1].wifiSsid, false,
-	"WiFiPassword2: ", "wifipwd2", settings.wifiSettings[1].wifiPassword, true,
-	"WiFiSSID3: ", "wifissid3", settings.wifiSettings[2].wifiSsid, false,
-	"WiFiPassword3: ", "wifipwd3", settings.wifiSettings[2].wifiPassword, true,
-	"WiFiSSID4: ", "wifissid4", settings.wifiSettings[3].wifiSsid, false,
-	"WiFiPassword4: ", "wifipwd4", settings.wifiSettings[3].wifiPassword, true,
-	"WiFiSSID5: ", "wifissid5", settings.wifiSettings[4].wifiSsid, false,
-	"WiFiPassword5: ", "wifipwd5", settings.wifiSettings[4].wifiPassword, true,
-	"MQTT DeviceName: ", "mname", settings.mqttName,false,
-	"MQTT Host: ", "mhost", settings.mqttServer, false,
-	"MQTT UserName: ", "muser", settings.mqttUser,false,
-	"MQTT Password: ", "mpwd", settings.mqttPassword, true,
-	"MQTT Publish topic: ", "mpub", settings.mqttPublishTopic, false,
-	"MQTT Subscribe topic: ", "msub", settings.mqttSubscribeTopic, false
-};
-
-
 const char adminPageHeader[] =
 "<html>"
 "<head>"

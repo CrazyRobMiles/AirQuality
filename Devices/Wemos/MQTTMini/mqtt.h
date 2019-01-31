@@ -4,13 +4,10 @@
 
 unsigned long mqtt_timer_start;
 
-#ifdef SECURE_SOCKETS
-WiFiClientSecure espClient;
-#else
-WiFiClient espClient;
-#endif
 
-PubSubClient mqttPubSubClient(espClient);
+Client * espClient;
+
+PubSubClient * mqttPubSubClient;
 
 #define MQTT_RECEIVE_BUFFER_SIZE 240
 char mqtt_receive_buffer[MQTT_RECEIVE_BUFFER_SIZE];
@@ -38,7 +35,7 @@ boolean send_buffer_to_mqtt(char * buffer)
 
 	TRACELN(mqtt_send_buffer);
 
-	mqttPubSubClient.publish(settings.mqttPublishTopic, buffer);
+	mqttPubSubClient->publish(settings.mqttPublishTopic, buffer);
 	TRACELN("MQTT sent");
 	return true;
 }
@@ -154,7 +151,7 @@ void send_to_mqtt_with_retry()
 {
 	if (send_to_mqtt())
 	{
-		mqtt_reading_interval_in_millis = settings.seconds_per_mqtt_update * 1000;
+		mqtt_reading_interval_in_millis = settings.mqttSecsPerUpdate * 1000;
 	}
 	else
 	{
@@ -194,6 +191,17 @@ void do_mqtt_send()
 
 void setup_mqtt()
 {
+	if (settings.mqttSecureSockets)
+	{
+		espClient = new WiFiClientSecure();
+	}
+	else
+	{
+		espClient = new WiFiClient();
+	}
+
+	mqttPubSubClient = new PubSubClient(*espClient);
+
 	pub_mqtt_force_send = false;
 	mqttState = AwaitingWiFi;
 }
@@ -201,7 +209,7 @@ void setup_mqtt()
 void mqtt_connect_failed()
 {
 	TRACE("MQTT failed with state ");
-	TRACELN(mqttPubSubClient.state());
+	TRACELN(mqttPubSubClient->state());
 	mqtt_timer_start = millis();
 	update_action(settings.mqttName, "Connect Failed");
 	mqttState = ShowingConnectToMQTTServerFailed;
@@ -212,7 +220,7 @@ void mqtt_connected()
 	TRACELN("MQTT connected");
 	mqtt_timer_start = millis();
 	update_action(settings.mqttName, "Connected OK");
-	mqttPubSubClient.subscribe(settings.mqttSubscribeTopic);
+	mqttPubSubClient->subscribe(settings.mqttSubscribeTopic);
 	mqttState = ShowingConnectedToMQTTServer;
 	pub_mqtt_force_send = true;
 }
@@ -225,7 +233,7 @@ void attempt_mqtt_connect()
 	TRACELN(settings.mqttPort);
 	TRACELN(settings.mqttServer);
 
-	if (mqttPubSubClient.connect(settings.mqttName, settings.mqttUser, settings.mqttPassword))
+	if (mqttPubSubClient->connect(settings.mqttName, settings.mqttUser, settings.mqttPassword))
 	{
 		mqtt_connected();
 	}
@@ -247,8 +255,8 @@ void loop_mqtt()
 		{
 			// Start the MQTT connection running
 			start_action(settings.mqttName, "Connecting to MQTT");
-			mqttPubSubClient.setServer(settings.mqttServer, settings.mqttPort);
-			mqttPubSubClient.setCallback(callback);
+			mqttPubSubClient->setServer(settings.mqttServer, settings.mqttPort);
+			mqttPubSubClient->setCallback(callback);
 			attempt_mqtt_connect();
 		}
 		break;
@@ -265,7 +273,7 @@ void loop_mqtt()
 			end_action();
 			mqttState = ConnectedToMQTTServer;
 		}
-		mqttPubSubClient.loop();
+		mqttPubSubClient->loop();
 		break;
 
 	case ShowingConnectToMQTTServerFailed:
@@ -279,7 +287,7 @@ void loop_mqtt()
 		break;
 
 	case ConnectedToMQTTServer:
-		mqttPubSubClient.loop();
+		mqttPubSubClient->loop();
 		break;
 
 	case ConnectToMQTTServerFailed:

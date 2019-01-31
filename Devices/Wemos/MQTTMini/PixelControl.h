@@ -624,7 +624,6 @@ void setup_pixels()
 	else
 	{
 		active_pixel_loop = pixel_update;
-//		strip = 
 		strip.begin();
 		strip.show(); // Initialize all pixels to 'off'
 		clearVirtualPixels(lamps);

@@ -39,7 +39,7 @@ enum DeviceStates { starting, wifiSetup, showStatus, active};
 DeviceStates deviceState;
 
 #define NO_OF_WIFI_SETTINGS 5
-#define DEVICE_NAME_LENGTH 10
+#define DEVICE_NAME_LENGTH 20
 
 #define WIFI_SSID_LENGTH 30
 #define WIFI_PASSWORD_LENGTH 30
@@ -50,6 +50,10 @@ DeviceStates deviceState;
 #define MQTT_DEVICE_NAME_LENGTH 100
 #define MQTT_PUBLISH_TOPIC_LENGTH 100
 #define MQTT_SUBSCRIBE_TOPIC_LENGTH 100
+#define NUMBER_INPUT_LENGTH 20
+#define YESNO_INPUT_LENGTH 0
+#define ONOFF_INPUT_LENGTH 0
+#define SETTING_ERROR_MESSAGE_LENGTH 120
 
 #define MAX_SETTING_LENGTH 300
 
@@ -66,8 +70,9 @@ struct Device_Settings
 	char deviceNane[DEVICE_NAME_LENGTH];
 
 	WiFi_Setting wifiSettings[NO_OF_WIFI_SETTINGS];
-	bool wiFiOn;
+	boolean wiFiOn;
 	char mqttServer[MQTT_SERVER_NAME_LENGTH];
+	boolean mqttSecureSockets;
 	int mqttPort;
 	char mqttUser[MQTT_USER_NAME_LENGTH];
 	char mqttPassword[MQTT_PASSWORD_LENGTH];
@@ -75,11 +80,12 @@ struct Device_Settings
 	char mqttPublishTopic[MQTT_PUBLISH_TOPIC_LENGTH];
 	char mqttSubscribeTopic[MQTT_SUBSCRIBE_TOPIC_LENGTH];
 
-	int seconds_per_mqtt_update;
+	int mqttSecsPerUpdate;
 	int seconds_per_mqtt_retry;
 	boolean mqtt_enabled;
 
 	int airqSensorType;
+	int airQSecnondsSensorWarmupTime;
 
 	int airqLowLimit;
 	int airqLowWarnLimit;
@@ -91,39 +97,60 @@ struct Device_Settings
 	float pixel_red;
 	float pixel_green;
 	float pixel_blue;
+
 	byte checkByte2;
 };
 
 struct Device_Settings settings;
 
+enum Setting_Type { text, password, number, onOff, yesNo };
+
 struct SettingItem {
 	char * prompt;
 	char * formName;
-	char * value;
+	void * value;
 	int maxLength;
-	bool isPassword;
+	Setting_Type settingType;
 };
+
 
 #define DEV_NAME_PREFIX "MQTTMini"
 
-struct SettingItem settingItems[] =
+struct SettingItem wifiSettingItems[] =
 {
-	"WiFiSSID1: ", "wifissid1", settings.wifiSettings[0].wifiSsid, WIFI_SSID_LENGTH, false,
-	"WiFiPassword1: ", "wifipwd1", settings.wifiSettings[0].wifiPassword, WIFI_PASSWORD_LENGTH, true,
-	"WiFiSSID2: ", "wifissid2", settings.wifiSettings[1].wifiSsid, WIFI_SSID_LENGTH, false,
-	"WiFiPassword2: ", "wifipwd2", settings.wifiSettings[1].wifiPassword, WIFI_PASSWORD_LENGTH, true,
-	"WiFiSSID3: ", "wifissid3", settings.wifiSettings[2].wifiSsid, WIFI_SSID_LENGTH, false,
-	"WiFiPassword3: ", "wifipwd3", settings.wifiSettings[2].wifiPassword, WIFI_PASSWORD_LENGTH, true,
-	"WiFiSSID4: ", "wifissid4", settings.wifiSettings[3].wifiSsid, WIFI_SSID_LENGTH, false,
-	"WiFiPassword4: ", "wifipwd4", settings.wifiSettings[3].wifiPassword, WIFI_PASSWORD_LENGTH, true,
-	"WiFiSSID5: ", "wifissid5", settings.wifiSettings[4].wifiSsid, WIFI_SSID_LENGTH, false,
-	"WiFiPassword5: ", "wifipwd5", settings.wifiSettings[4].wifiPassword, WIFI_PASSWORD_LENGTH, true,
-	"MQTT DeviceName: ", "mname", settings.mqttName, MQTT_DEVICE_NAME_LENGTH, false,
-	"MQTT Host: ", "mhost", settings.mqttServer, MQTT_SERVER_NAME_LENGTH, false,
-	"MQTT UserName: ", "muser", settings.mqttUser, MQTT_USER_NAME_LENGTH, false,
-	"MQTT Password: ", "mpwd", settings.mqttPassword, MQTT_PASSWORD_LENGTH, true,
-	"MQTT Publish topic: ", "mpub", settings.mqttPublishTopic, MQTT_PUBLISH_TOPIC_LENGTH, false,
-	"MQTT Subscribe topic: ", "msub", settings.mqttSubscribeTopic, MQTT_SUBSCRIBE_TOPIC_LENGTH, false
+	"Devce name", "devname", settings.deviceNane, DEVICE_NAME_LENGTH, text,
+	"WiFiSSID1", "wifissid1", settings.wifiSettings[0].wifiSsid, WIFI_SSID_LENGTH, text,
+	"WiFiPassword1", "wifipwd1", settings.wifiSettings[0].wifiPassword, WIFI_PASSWORD_LENGTH, password,
+	"WiFiSSID2", "wifissid2", settings.wifiSettings[1].wifiSsid, WIFI_SSID_LENGTH, text,
+	"WiFiPassword2", "wifipwd2", settings.wifiSettings[1].wifiPassword, WIFI_PASSWORD_LENGTH, password,
+	"WiFiSSID3", "wifissid3", settings.wifiSettings[2].wifiSsid, WIFI_SSID_LENGTH, text,
+	"WiFiPassword3", "wifipwd3", settings.wifiSettings[2].wifiPassword, WIFI_PASSWORD_LENGTH, password,
+	"WiFiSSID4", "wifissid4", settings.wifiSettings[3].wifiSsid, WIFI_SSID_LENGTH, text,
+	"WiFiPassword4", "wifipwd4", settings.wifiSettings[3].wifiPassword, WIFI_PASSWORD_LENGTH, password,
+	"WiFiSSID5", "wifissid5", settings.wifiSettings[4].wifiSsid, WIFI_SSID_LENGTH, text,
+	"WiFiPassword5", "wifipwd5", settings.wifiSettings[4].wifiPassword, WIFI_PASSWORD_LENGTH, password,
+	"WiFi On", "wifion", &settings.wiFiOn, ONOFF_INPUT_LENGTH, onOff
+};
+
+struct SettingItem mqtttSettingItems[] =
+{
+	"MQTT DeviceName", "mname", settings.mqttName, MQTT_DEVICE_NAME_LENGTH, text,
+	"MQTT Host", "mhost", settings.mqttServer, MQTT_SERVER_NAME_LENGTH, text,
+	"MQTT port number", "mport", &settings.mqttPort, NUMBER_INPUT_LENGTH, number,
+	"MQTT secure sockets (on or off)", "msecure", &settings.mqttSecureSockets, ONOFF_INPUT_LENGTH, onOff,
+	"MQTT On", "mqtton", &settings.mqtt_enabled, ONOFF_INPUT_LENGTH, onOff,
+	"MQTT UserName", "muser", settings.mqttUser, MQTT_USER_NAME_LENGTH, text,
+	"MQTT Password", "mpwd", settings.mqttPassword, MQTT_PASSWORD_LENGTH, password,
+	"MQTT Publish topic", "mpub", settings.mqttPublishTopic, MQTT_PUBLISH_TOPIC_LENGTH, text,
+	"MQTT Subscribe topic", "msub", settings.mqttSubscribeTopic, MQTT_SUBSCRIBE_TOPIC_LENGTH, text,
+	"MQTT Seconds per update", "msecs", &settings.mqttSecsPerUpdate, NUMBER_INPUT_LENGTH, number,
+	"MQTT Seconds per retry", "msretry", &settings.seconds_per_mqtt_retry, NUMBER_INPUT_LENGTH, number
+};
+
+struct SettingItem mqtttSettingItems[] =
+{
+	"AirQ Sensor type (1=SDS011, 2=XPH01)", "airqsensortype", &settings.airqSensorType, NUMBER_INPUT_LENGTH, number,
+	"AirQ Seconds for sensor warmup", "airqsensorwarmup", &settings.airQSecnondsSensorWarmupTime, NUMBER_INPUT_LENGTH, number
 };
 
 enum WiFiState { WiFiOff, WiFiStarting, WiFiScanning, WiFiWaitingForNextScan, WiFiConnecting, WiFiConnected, ShowingWifiConnected, WiFiConnectFailed, WiFiNotConnected,

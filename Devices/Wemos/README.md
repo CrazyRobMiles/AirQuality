@@ -4,6 +4,10 @@
 
 This is a minimalist sensor designed for low cost. It uses a Wemos D1 Mini as the processor, a cheaper ZPH01 dust sensor, a BME280 environmental sensor and a neopixel ring for the output.
 
+
+NOTE THAT THIS SOFTWARE HAS BEEN SUPERCEEDED BY THE MONITAIR SOFTWARE
+
+
 The connections to the Wemos are as follows (the D values are the pins as labelled on the Wemos device itself)
 
 | Function   |   Wemos Pin    |  Arduino Pin | Source File |

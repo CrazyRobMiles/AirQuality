@@ -20,14 +20,14 @@ unsigned long wifi_timer_start;
 std::unique_ptr<DNSServer> dnsServer;
 const byte DNS_PORT = 53;
 
-const char adminPageHeader[] =
+const char configPageHeader[] =
 "<html>"
 "<head>"
 //"<style>input {font-size: 1.2em; width: 100%; max-width: 360px; display: block; margin: 5px auto; } </style>"
 "<style>input {margin: 5px auto; } </style>"
 "</head>"
 "<body>"
-"<h1> MQTTT Mini Configuration</h1>"
+"<h1> Monitair Configuration</h1>"
 "<form id='form' action='/' method='post'>";
 
 const char adminPageFooter[] =
@@ -40,43 +40,101 @@ const char adminPageFooter[] =
 
 char webPageBuffer[WEB_PAGE_BUFFER_SIZE];
 
-#define TOPIC_BUFFER_SIZE 200
+#define ERROR_MESSAGE_BUFFER_SIZE 2000
+char errorMessageBuffer[ERROR_MESSAGE_BUFFER_SIZE];
 
-char topicBuffer[TOPIC_BUFFER_SIZE];
-
-void buildWebPageBuffer()
+void buildWebPageBuffer(char * webPgeBuffer, int bufferSize)
 {
-	strcpy(webPageBuffer, adminPageHeader);
+	int * valuePointer;
+	boolean * boolPointer;
+
+	snprintf(webPageBuffer, bufferSize, "%s", configPageHeader);
 
 	for (int i = 0; i < sizeof(settingItems) / sizeof(struct SettingItem); i++)
 	{
-		sprintf(topicBuffer, "<label for='%s'> %s </label>",
+		snprintf(webPageBuffer, bufferSize, "%s <label for='%s'> %s: </label>",
+			webPageBuffer,
 			settingItems[i].formName,
 			settingItems[i].prompt);
 
-		strcat(webPageBuffer, topicBuffer);
-
-		if (settingItems[i].isPassword)
+		switch (settingItems[i].settingType)
 		{
-			sprintf(topicBuffer, "<input name = '%s' type = 'password' value='%s'><br>",
-				settingItems[i].formName, settingItems[i].value);
+		case text:
+			snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'text' value='%s'><br>",
+				webPageBuffer, settingItems[i].formName, settingItems[i].value);
+			break;
+		case password:
+			snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'password' value='%s'><br>",
+				webPageBuffer, settingItems[i].formName, settingItems[i].value);
+			break;
+		case number:
+			valuePointer = (int*)settingItems[i].value;
+			snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'text' value='%d'><br>",
+				webPageBuffer, settingItems[i].formName, *valuePointer);
+			break;
+		case onOff:
+			boolPointer = (boolean*)settingItems[i].value;
+			if (*boolPointer)
+			{
+				snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'text' value='on'><br>",
+					webPageBuffer, settingItems[i].formName);
+			}
+			else
+			{
+				snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'text' value='off'><br>",
+					webPageBuffer, settingItems[i].formName);
+			}
+			break;
+		case yesNo:
+			boolPointer = (boolean*)settingItems[i].value;
+			if (*boolPointer)
+			{
+				snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'text' value='yes'><br>",
+					webPageBuffer, settingItems[i].formName);
+			}
+			else
+			{
+				snprintf(webPageBuffer, bufferSize, "%s <input name = '%s' type = 'text' value='no'><br>",
+					webPageBuffer, settingItems[i].formName);
+			}
+			break;
 		}
-		else
-		{
-			sprintf(topicBuffer, "<input name = '%s' type = 'text' value='%s'><br>",
-				settingItems[i].formName, settingItems[i].value);
-		}
-		strcat(webPageBuffer, topicBuffer);
 	}
 
-	strcat(webPageBuffer, adminPageFooter);
+	snprintf(webPageBuffer, bufferSize, "%s %s",
+		webPageBuffer, adminPageFooter);
 }
 
-void serveAdmin(ESP8266WebServer *webServer) {
+const char replyPageHeader[] = "<html><head></head><body>";
+
+const char replyPageFooter[] = "New settings will take effect after restart. Disconnect the MQTT device from power, turn it the right way up and power it up again.</body></html>";
+
+void serveWifiConfig(ESP8266WebServer *webServer) 
+{
+	Serial.println("Wifi config hit");
+}
+
+void serveHardwareConfig(ESP8266WebServer *webServer)
+{
+	Serial.println("Hardware config hit");
+}
+
+void serveMQTTConfig(ESP8266WebServer *webServer)
+{
+	Serial.println("MQTT config hit");
+}
+
+const char replyPageHeader[] = "<html><head></head><body>";
+
+const char replyPageFooter[] = "New settings will take effect after restart. Disconnect the MQTT device from power, turn it the right way up and power it up again.</body></html>";
+
+void serveHome(ESP8266WebServer *webServer) 
+{
 
 	TRACELN("Serve request hit");
 
-	String message;
+	// Empty the error message string
+	snprintf(errorMessageBuffer, ERROR_MESSAGE_BUFFER_SIZE, "%s", replyPageHeader);
 
 	// Check to see if we've been sent any arguments and instantly return if not
 	if (webServer->args() == 0) {
@@ -90,7 +148,64 @@ void serveAdmin(ESP8266WebServer *webServer) {
 		{
 			String fName = String(settingItems[i].formName);
 			String argValue = webServer->arg(fName);
-			strcpy(settingItems[i].value, argValue.c_str());
+
+			switch (settingItems[i].settingType)
+			{
+			case text:
+				strcpy((char *)settingItems[i].value, argValue.c_str());
+				break;
+			case password:
+				strcpy((char *)settingItems[i].value, argValue.c_str());
+				break;
+			case number:
+				int value;
+				if (sscanf(argValue.c_str(), "%d", &value) == 1)
+				{
+					*(int *)settingItems[i].value = value;
+				}
+				else
+				{
+					snprintf(errorMessageBuffer, ERROR_MESSAGE_BUFFER_SIZE, "%s <p>Invalid value %s for %s</p> ",
+						errorMessageBuffer, argValue.c_str(), settingItems[i].prompt);
+				}
+				break;
+			case onOff:
+				if (strcasecmp(argValue.c_str(), "on") == 0)
+				{
+					*(boolean *)settingItems[i].value = true;
+				}
+				else
+				{
+					if (strcasecmp(argValue.c_str(), "off") == 0)
+					{
+						*(boolean *)settingItems[i].value = false;
+					}
+					else
+					{
+						snprintf(errorMessageBuffer, ERROR_MESSAGE_BUFFER_SIZE, "%s <p>Invalid value %s for %s</p> ",
+							errorMessageBuffer, argValue.c_str(), settingItems[i].prompt);
+					}
+				}
+				break;
+			case yesNo:
+				if (strcasecmp(argValue.c_str(), "yes") == 0)
+				{
+					*(boolean *)settingItems[i].value = true;
+				}
+				else
+				{
+					if (strcasecmp(argValue.c_str(), "no") == 0)
+					{
+						*(boolean *)settingItems[i].value = true;
+					}
+					else
+					{
+						snprintf(errorMessageBuffer, ERROR_MESSAGE_BUFFER_SIZE, "%s <p>Invalid value %s for %s</p> ",
+							errorMessageBuffer, argValue.c_str(), settingItems[i].prompt);
+					}
+				}
+				break;
+			}
 			TRACE(fName);
 			TRACE(settingItems[i].value);
 			TRACELN(argValue);
@@ -100,21 +215,16 @@ void serveAdmin(ESP8266WebServer *webServer) {
 
 		save_settings();
 
-		// Construct a message to tell the user that the change worked
-		message = "New settings will take effect after restart. Disconnect the MQTT device from power, turn it the right way up and power it up again.";
+		snprintf(errorMessageBuffer, ERROR_MESSAGE_BUFFER_SIZE, "%s %s", errorMessageBuffer, replyPageFooter);
 
-		// Reply with a web page to indicate success or failure
-		message = "<html><head></head><body>" + message;
-		message += "</body></html>";
-		webServer->sendHeader("Content-Length", String(message.length()));
-		webServer->send(200, "text/html", message);
+		webServer->sendHeader("Content-Length", String(strlen(errorMessageBuffer)));
+		webServer->send(200, "text/html", errorMessageBuffer);
 
 		delay(500);
 
 		wifiState = WiFiSetupProcessingResponse;
 	}
 }
-
 
 // Checks all of the bytes in the string array to make sure they are valid characters
 bool ValidateString(char* value) {
@@ -162,10 +272,10 @@ void startWifiConfig()
 
 	webServer = new ESP8266WebServer(80);
 
-	buildWebPageBuffer();
+	buildWebPageBuffer(webPageBuffer, WEB_PAGE_BUFFER_SIZE);
 
 	// Set up the admin page
-	webServer->on("/", std::bind(serveAdmin, webServer));
+	webServer->on("/", std::bind(serveHome, webServer));
 	webServer->begin();
 }
 

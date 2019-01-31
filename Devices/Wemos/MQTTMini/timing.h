@@ -44,7 +44,7 @@ void readings_ready()
 
 void setup_timing()
 {
-	mqtt_reading_interval_in_millis = settings.seconds_per_mqtt_update * 1000;
+	mqtt_reading_interval_in_millis = settings.mqttSecsPerUpdate * 1000;
 	milliseconds_at_last_mqtt_update = millis() ;
 }
 

@@ -172,7 +172,7 @@ void dump_settings()
 	Serial.print("MQTT device name: "); Serial.println(settings.mqttName);
 	Serial.print("MQTT publish topic: "); Serial.println(settings.mqttPublishTopic);
 	Serial.print("MQTT subscribe topic: "); Serial.println(settings.mqttSubscribeTopic);
-	Serial.print("MQTT seconds per update: "); Serial.println(settings.seconds_per_mqtt_update);
+	Serial.print("MQTT seconds per update: "); Serial.println(settings.mqttSecsPerUpdate);
 	Serial.print("MQTT enabled: "); Serial.println(settings.mqtt_enabled);
 }
 
@@ -498,11 +498,11 @@ void do_mqtt_gap(JsonObject& root, char * resultBuffer)
 
 		if (!option)
 		{
-			build_number_value_command_reply(WORKED_OK, settings.seconds_per_mqtt_update, root, resultBuffer);
+			build_number_value_command_reply(WORKED_OK, settings.mqttSecsPerUpdate, root, resultBuffer);
 			return;
 		}
 
-		reply = decodeNumericValue(&settings.seconds_per_mqtt_update, root, "val", MIN_MQTT_GAP, MAX_MQTT_GAP);
+		reply = decodeNumericValue(&settings.mqttSecsPerUpdate, root, "val", MIN_MQTT_GAP, MAX_MQTT_GAP);
 
 		if (reply == WORKED_OK)
 		{
@@ -1117,8 +1117,6 @@ void do_airqHighWarnLimit(JsonObject& root, char * resultBuffer)
 //int airqHighWarnLimit; arqMidWarnLimit - airQHighAlertLimit
 //int airQHighAlertLimit; > airqHighWarnLimit
 
-
-
 // {"v":1, "t" : "sensor01", "c" : "node", "o" : "airqhighalert", "val":2}
 void do_airqHighAlertLimit(JsonObject& root, char * resultBuffer)
 {
@@ -1325,19 +1323,19 @@ void reset_settings()
 	settings.checkByte1 = CHECK_BYTE_O1;
 	settings.checkByte2 = CHECK_BYTE_O2;
 
-	strcpy(settings.deviceNane, "sensor01");
+	snprintf(settings.deviceNane, DEVICE_NAME_LENGTH, "Monitair-%06x", ESP.getChipId());
 
 	settings.wiFiOn = true;
 
 	// enter some pre-set WiFi locations
-	strcpy(settings.wifiSettings[0].wifiSsid, "sdfsdf");
-	strcpy(settings.wifiSettings[0].wifiPassword, "sdfsfd");
+	strcpy(settings.wifiSettings[0].wifiSsid, "ssid1");
+	strcpy(settings.wifiSettings[0].wifiPassword, "password1");
 
-	strcpy(settings.wifiSettings[1].wifiSsid, "sdfdfdf");
-	strcpy(settings.wifiSettings[1].wifiPassword, "fdfsddf");
+	strcpy(settings.wifiSettings[1].wifiSsid, "ssid2");
+	strcpy(settings.wifiSettings[1].wifiPassword, "password2");
 
-	strcpy(settings.wifiSettings[2].wifiSsid, "dsdsdffd");
-	strcpy(settings.wifiSettings[2].wifiPassword, "fdsffdsf");
+	strcpy(settings.wifiSettings[2].wifiSsid, "ssid3");
+	strcpy(settings.wifiSettings[2].wifiPassword, "password3");
 
 	// clear the rest of the settings
 	for (int i = 3; i < NO_OF_WIFI_SETTINGS; i++)
@@ -1346,7 +1344,7 @@ void reset_settings()
 		settings.wifiSettings[i].wifiPassword[0] = 0;
 	}
 
-	settings.seconds_per_mqtt_update = SECONDS_PER_MQTT_UPDATE;
+	settings.mqttSecsPerUpdate = SECONDS_PER_MQTT_UPDATE;
 	settings.seconds_per_mqtt_retry = SECONDS_PER_MQTT_RETRY;
 	settings.mqtt_enabled = true;
 
@@ -1359,44 +1357,22 @@ void reset_settings()
 	settings.airqMidWarnLimit = 3;
 	settings.airqHighWarnLimit = 4;
 	settings.airQHighAlertLimit = 5;
+	settings.airQSecnondsSensorWarmupTime = 30;
 
 	settings.noOfPixels = 12;
 	settings.pixel_red = 0;
 	settings.pixel_blue = 0;
 	settings.pixel_green = 1.0;
 
-#ifdef SECURE_SOCKETS
-
-	strcpy(settings.mqttServer, "mydevice.azure-devices.net");
-	settings.mqttPort = 8883;
-	strcpy(settings.mqttName, "MQTTMini01");
-	strcpy(settings.mqttUser, "mydevice.azure-devices.net/MQTTMini01");
-	strcpy(settings.mqttPassword, "SharedAccessSignature sr=mydevice.azure-devices.net%2Fdevices%2FMQTTMini01&sig=sdfsddsdsffsdfsdfssfSFcRG%2BaeE%3D&se=1568130534");
-
-	strcpy(settings.mqttPublishTopic, "devices/MQTTMini01/messages/events/");
-	strcpy(settings.mqttSubscribeTopic, "devices/MQTTMini01/messages/devicebound/#");
-
-#else
-
-	strcpy(settings.mqttServer, "mqtt.connectedhumber.org");
+	strcpy(settings.mqttServer, "mqtt.yourmqttserver.com");
+//	settings.mqttPort = 8883; // value for secure sockets on Azure IoT Hub
 	settings.mqttPort = 1883;
-	strcpy(settings.mqttUser, "sdfsdf");
-	strcpy(settings.mqttPassword, "sdfsdsdf");
-	strcpy(settings.mqttName, "Sensor01");
-	strcpy(settings.mqttPublishTopic, "sensor01/data");
-	strcpy(settings.mqttSubscribeTopic, "sensor01/commands");
-
-
-	strcpy(settings.mqttServer, "mqtt.connectedhumber.org");
-	settings.mqttPort = 1883;
-	strcpy(settings.mqttUser, "connectedhumber");
-	strcpy(settings.mqttPassword, "3fds8gssf6");
-	strcpy(settings.mqttName, "Sensor02");
-	strcpy(settings.mqttPublishTopic, "sensor02/data");
-	strcpy(settings.mqttSubscribeTopic, "sensor02/commands");
-
-
-#endif
+	settings.mqttSecureSockets = false;
+	strcpy(settings.mqttName, settings.deviceNane);
+	strcpy(settings.mqttUser, "mqttusername");
+	strcpy(settings.mqttPassword, "mqttpssword");
+	strcpy(settings.mqttPublishTopic, "airquality/data");
+	strcpy(settings.mqttSubscribeTopic, "airquality/commands");
 }
 
 void serial_deliver_command_result(char * result)
@@ -1468,49 +1444,6 @@ void check_serial_buffer()
 			}
 		}
 	}
-}
-
-void loadCommandsFromTerminal()
-{
-	char devName[80];
-
-	Serial.setTimeout(600000);
-
-	sprintf(devName, "%s %06X", DEV_NAME_PREFIX, ESP.getChipId());
-
-	Serial.printf("Device name: %s\n", devName);
-
-	Serial.println("Initial Setup");
-
-	for (int i = 0; i < sizeof(settingItems) / sizeof(struct SettingItem); i++)
-	{
-		if (settingItems[i].isPassword)
-		{
-			Serial.printf("Setting %s\nEnter setting (blank to leave unchanged): ",
-				settingItems[i].prompt);
-		}
-		else
-		{
-			Serial.printf("Setting %s current value: %s\nEnter setting (blank to leave unchanged): ",
-				settingItems[i].prompt, settingItems[i].value);
-		}
-
-		char inputBuffer[MAX_SETTING_LENGTH];
-
-		int length = Serial.readBytesUntil('\n', inputBuffer, MAX_SETTING_LENGTH - 1);
-		
-		if (length > 0)
-		{
-			inputBuffer[length] = 0;
-			strcpy(settingItems[i].value, inputBuffer);
-		}
-
-		Serial.println();
-	}
-
-	Serial.println("Settings");
-
-	dump_settings();
 }
 
 void setup_commands()

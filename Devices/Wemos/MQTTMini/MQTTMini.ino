@@ -50,9 +50,8 @@
 void setup() {
 	// put your setup code here, to run once:
 	Serial.begin(115200);
-	delay(1000);
-	Serial.println("Starting");
 	delay(500);
+	Serial.println("Starting");
 	setup_commands(); // must call this first because it loads all the settings used by 
 					  // all the elements
 	setup_airq_sensor();

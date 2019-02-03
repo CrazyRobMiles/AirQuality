@@ -44,7 +44,7 @@ void zph01_pump_byte(byte b)
 			if (calculatedChecksum == b)
 			{
 				// Got a valid value
-				pub_ppm_25 = sensorBuffer[2] + sensorBuffer[2] / 10.0;
+				pub_ppm_25 = sensorBuffer[2] + sensorBuffer[3] / 100.0;
 				if (first_airq_reading)
 				{
 					Serial.println("Got first reading from ZPH01");

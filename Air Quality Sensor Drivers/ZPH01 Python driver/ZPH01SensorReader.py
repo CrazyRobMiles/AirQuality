@@ -113,7 +113,7 @@ class DustSensor(object):
         if block[1] != 0x18:
             raise DustSensorException('Invalid block type')
             return None
-        rate = block[3] + block[4]/10.0
+        rate = block[3] + block[4]/100.0
         return rate
 
     def open_connection(self,port_name):

@@ -1,3 +1,4 @@
+
 #include <DNSServer.h>
 #include <Adafruit_NeoPixel.h>
 #include <ezTime.h>
@@ -66,12 +67,5 @@ void loop()
 
 	updateSensors();
 
-	createSensorJson(jsonBuffer, JSON_BUFFER_SIZE);
-
-	if (publishReadingsToMQTT(jsonBuffer))
-	{
-
-		//Serial.println(jsonBuffer);
-	}
-	activeDelay(settings.mqttSecsPerUpdate * 1000 + 1);
+	sendSensorReadings();
 }

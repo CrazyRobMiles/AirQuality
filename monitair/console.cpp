@@ -70,7 +70,7 @@ struct command userCommands[] =
 void doHelp(char * commandLine)
 {
 	Serial.printf("\n\nMonitair System Software Version %d.%d\n\nThese are all the available commands.\n\n",
-		settings.majorVersion, settings.minorVersion);
+		MAJOR_VERSION, MINOR_VERSION);
 
 	int noOfCommands = sizeof(userCommands) / sizeof(struct command);
 

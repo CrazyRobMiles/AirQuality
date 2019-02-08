@@ -30,7 +30,7 @@ const char homePageFooter[] =
 
 void buildHomePage(char * webPageBuffer, int bufferSize, SettingItemCollection * allSettings, int noOfSettings)
 {
-	snprintf(webPageBuffer, bufferSize, homePageHeader, settings.majorVersion, settings.minorVersion);
+	snprintf(webPageBuffer, bufferSize, homePageHeader, MAJOR_VERSION, MINOR_VERSION);
 
 	for (int collectionNo = 0; collectionNo < noOfSettings; collectionNo++)
 	{

@@ -2,6 +2,9 @@
 
 #include <Arduino.h>
 
+#define MAJOR_VERSION 1
+#define MINOR_VERSION 1
+
 // Sensor settings
 #define UNKNOWN_SENSOR 0
 #define SDS011_SENSOR 1

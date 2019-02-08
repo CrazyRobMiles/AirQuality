@@ -1,4 +1,3 @@
-
 #include <DNSServer.h>
 #include <Adafruit_NeoPixel.h>
 #include <ezTime.h>
@@ -54,7 +53,7 @@ void setup() {
 	delay(500);
 	setupSettings();
 	Serial.printf("\n\nMonitair node %s\nVersion %d.%d\n\n", settings.deviceName, 
-		settings.majorVersion, settings.minorVersion);
+		MAJOR_VERSION, MINOR_VERSION);
 
 	startDevice();
 

@@ -154,10 +154,13 @@ int stopMQTT(struct process * mqttProcess)
 	return MQTT_OFF;
 }
 
+unsigned long timeOfLastMQTTsuccess = 0;
+
 int updateMQTT(struct process * mqttProcess)
 {
 	if (mqttProcess->status == MQTT_OK)
 	{
+		timeOfLastMQTTsuccess = millis();
 		if (!mqttPubSubClient->loop())
 		{
 			mqttProcess->status = MQTT_ERROR_LOOP_FAILED;
@@ -165,8 +168,12 @@ int updateMQTT(struct process * mqttProcess)
 	}
 	else
 	{
-		Serial.println("Restarting MQTT");
-		mqttProcess->status = startMQTT(mqttProcess);
+		if (ulongDiff(millis(), timeOfLastMQTTsuccess) > MQTT_CONNECT_RETRY_INTERVAL_MSECS)
+		{
+			Serial.println("Restarting MQTT");
+			mqttProcess->status = startMQTT(mqttProcess);
+			timeOfLastMQTTsuccess = millis();
+		}
 	}
 	return mqttProcess->status;
 }

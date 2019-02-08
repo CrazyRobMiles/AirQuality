@@ -38,6 +38,8 @@ int startGps(struct sensor * gpsSensor)
 		gpsSerial->begin(9600);
 	}
 
+	gpsSerial->enableRx(false);
+
 	gpsSensor->status = SENSOR_OK;
 	return gpsSensor->status;
 }
@@ -47,8 +49,11 @@ int updateGpsReading(struct sensor * gpsSensor)
 	gpsReadingStartTime = millis();
 
 	boolean noDataReceived = true;
+	boolean notGotGPS = true;
 
-	while (true)
+	gpsSerial->enableRx(true);
+
+	while (notGotGPS)
 	{
 		if (ulongDiff(millis(), gpsReadingStartTime) > GPS_READING_TIMEOUT_MSECS)
 		{
@@ -86,10 +91,14 @@ int updateGpsReading(struct sensor * gpsSensor)
 				activeGPSReading->longitude = nmea.getLongitude() / 1000000.0;
 				activeGPSReading->lastGPSreadingMillis = millis();
 				gpsSensor->status = SENSOR_OK;
-				return gpsSensor->status;
+				notGotGPS = false;
 			}
 		}
 	}
+
+	gpsSerial->enableRx(false);
+
+
 	return gpsSensor->status;
 }
 

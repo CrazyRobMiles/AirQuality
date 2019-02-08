@@ -16,6 +16,8 @@
 #define MQTT_ERROR_CONNECT_MESSAGE_FAILED -9
 #define MQTT_ERROR_LOOP_FAILED -10
 
+#define MQTT_CONNECT_RETRY_INTERVAL_MSECS 5000
+
 boolean publishReadingsToMQTT(char * buffer);
 
 int startMQTT(struct process * mqttProcess);

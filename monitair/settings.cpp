@@ -371,7 +371,7 @@ void setDefaultNoOfPixels(void * dest)
 
 struct SettingItem hardwareSettingItems[] =
 {
-	"AirQ Sensor type (0 = not fitted 1=SDS011, 2=XPH01)", "airqsensortype", &settings.airqSensorType, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirQSensorType, validateInt,
+	"AirQ Sensor type (0 = not fitted 1=SDS011, 2=ZPH01)", "airqsensortype", &settings.airqSensorType, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirQSensorType, validateInt,
 	"AirQ Seconds for sensor warmup", "airqsensorwarmup", &settings.airqSecnondsSensorWarmupTime, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirQWarmupTime, validateInt,
 	"AirQ RX Pin", "airqrxpinno", &settings.airqRXPinNo, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqRXpin, validateInt,
 	"BME 280 fitted", "bme280fitted", &settings.bme280Fitted, ONOFF_INPUT_LENGTH, yesNo, setTrue,validateYesNo,
@@ -503,8 +503,8 @@ void resetSettingCollection(SettingItemCollection * settingCollection)
 
 void resetSettings()
 {
-	settings.majorVersion = 1;
-	settings.minorVersion = 0;
+	settings.majorVersion = MAJOR_VERSION;
+	settings.minorVersion = MINOR_VERSION;
 
 	for (int collectionNo = 0; collectionNo < sizeof(allSettings) / sizeof(SettingItemCollection); collectionNo++)
 	{

@@ -107,6 +107,12 @@ int startAirq(struct sensor * airqSensor)
 		return AIRQ_ERROR_TIMED_OUT;
 	}
 
+	if (sensorType != settings.airqSensorType)
+	{
+		settings.airqSensorType = sensorType;
+		saveSettings();
+	}
+
 	airqSensor->status = SENSOR_OK;
 	return SENSOR_OK;
 }
@@ -205,6 +211,9 @@ boolean getXPH01reading(airqualityReading * result)
 		}
 
 		buffer = airqSensorSerial->read();
+
+		Serial.print(buffer, HEX);
+		Serial.print(" ");
 
 		value = int(buffer);
 

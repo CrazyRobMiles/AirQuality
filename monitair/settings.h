@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 2
+#define MINOR_VERSION 3
 
 // Sensor settings
 #define UNKNOWN_SENSOR 0
@@ -39,6 +39,8 @@ struct Device_Settings
 	byte checkByte1;
 
 	char deviceName[DEVICE_NAME_LENGTH];
+
+	boolean indoorDevice;
 
 	// WiFi settings
 
@@ -146,7 +148,6 @@ struct AllSystemSettings
 };
 
 enum processSettingCommandResult { displayedOK, setOK, settingNotFound, settingValueInvalid };
-
 
 void saveSettings();
 void loadSettings();

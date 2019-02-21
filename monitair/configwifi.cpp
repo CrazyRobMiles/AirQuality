@@ -25,7 +25,6 @@ char configSSID[WIFI_SSID_LENGTH];
 std::unique_ptr<DNSServer> dnsServer;
 const byte DNS_PORT = 53;
 
-
 int startWifiConfig(struct process * wifiConfigProcess)
 {
 	WiFi.mode(WIFI_AP);

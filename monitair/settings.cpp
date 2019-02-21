@@ -402,7 +402,8 @@ struct SettingItem locationSettingItems[] =
 {
 	"Fixed location", "fixedlocation", &settings.fixedLocation, ONOFF_INPUT_LENGTH, yesNo, setTrue,validateYesNo,
 	"Device lattitude", "lattitude", &settings.lattitude, NUMBER_INPUT_LENGTH, doubleValue, setDefaultPositionValue, validateDouble,
-	"Device longitude", "longitude", &settings.longitude, NUMBER_INPUT_LENGTH, doubleValue, setDefaultPositionValue, validateDouble
+	"Device longitude", "longitude", &settings.longitude, NUMBER_INPUT_LENGTH, doubleValue, setDefaultPositionValue, validateDouble,
+	"Device indoors", "indoorDevice", &settings.indoorDevice, ONOFF_INPUT_LENGTH, yesNo, setFalse,validateYesNo
 };
 
 
@@ -412,7 +413,8 @@ struct SettingItem quickSettingItems[] =
 	"WiFi password", "wifipwd1", settings.wifi1PWD, WIFI_PASSWORD_LENGTH, password, setEmptyString, validateWifiPWD,
 	"MQTT Password", "mqttpwd", settings.mqttPassword, MQTT_PASSWORD_LENGTH, password, setEmptyString,validateMQTTPWD,
 	"Device lattitude", "lattitude", &settings.lattitude, NUMBER_INPUT_LENGTH, doubleValue, setDefaultPositionValue, validateDouble,
-	"Device longitude", "longitude", &settings.longitude, NUMBER_INPUT_LENGTH, doubleValue, setDefaultPositionValue, validateDouble
+	"Device longitude", "longitude", &settings.longitude, NUMBER_INPUT_LENGTH, doubleValue, setDefaultPositionValue, validateDouble,
+	"Device indoors", "indoorDevice", &settings.indoorDevice, ONOFF_INPUT_LENGTH, yesNo, setFalse,validateYesNo
 };
 
 SettingItemCollection allSettings[] = {

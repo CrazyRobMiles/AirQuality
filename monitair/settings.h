@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 1
+#define MINOR_VERSION 2
 
 // Sensor settings
 #define UNKNOWN_SENSOR 0
@@ -107,6 +107,8 @@ struct Device_Settings
 	int airqMidWarnLimit;
 	int airqHighWarnLimit;
 	int airqHighAlertLimit;
+	int airqNoOfAverages;
+
 
 	int pixelRed;
 	int pixelGreen;

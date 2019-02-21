@@ -1,8 +1,7 @@
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+#include "SoftwareSerial.h"
 
 #include <MicroNMEA.h>
-#include <SoftwareSerial.h>
 
 #include "utils.h"
 #include "sensors.h"
@@ -13,8 +12,18 @@
 char nmeaBuffer[100];
 MicroNMEA nmea(nmeaBuffer, sizeof(nmeaBuffer));
 
-SoftwareSerial * gpsSerial;
+SoftwareSerial * gpsSerial = NULL;
+
 unsigned long gpsReadingStartTime;
+
+unsigned long lastGPSserialDataReceived;
+
+void printUnknownSentence(const MicroNMEA& nmea)
+{
+	//	TRACELN();
+	//	TRACE("Unknown sentence: ");
+	//	TRACELN(nmea.getSentence());
+}
 
 int startGps(struct sensor * gpsSensor)
 {
@@ -38,66 +47,67 @@ int startGps(struct sensor * gpsSensor)
 		gpsSerial->begin(9600);
 	}
 
-	gpsSerial->enableRx(false);
+	lastGPSserialDataReceived = millis();
 
-	gpsSensor->status = SENSOR_OK;
+	nmea.setUnknownSentenceHandler(printUnknownSentence);
+
+	gpsSensor->status = GPS_ERROR_NO_DATA_RECEIVED;
 	return gpsSensor->status;
 }
 
 int updateGpsReading(struct sensor * gpsSensor)
 {
-	gpsReadingStartTime = millis();
+	struct gpsReading * activeGPSReading;
+	activeGPSReading =
+		(struct gpsReading *) gpsSensor->activeReading;
 
-	boolean noDataReceived = true;
-	boolean notGotGPS = true;
+	unsigned long updateMillis = millis();
 
-	gpsSerial->enableRx(true);
-
-	while (notGotGPS)
+	if (gpsSerial->available() == 0)
 	{
-		if (ulongDiff(millis(), gpsReadingStartTime) > GPS_READING_TIMEOUT_MSECS)
+		if (gpsSensor->status != GPS_ERROR_NO_DATA_RECEIVED)
 		{
-			if (noDataReceived)
-			{
+			unsigned long timeSinceLastSerialData = ulongDiff(updateMillis, lastGPSserialDataReceived);
+
+			// if the data timeout has expired, change the state
+			if (timeSinceLastSerialData > GPS_SERIAL_DATA_TIMEOUT_MILLIS)
 				gpsSensor->status = GPS_ERROR_NO_DATA_RECEIVED;
-				break;
-			}
-			else
-			{
-				gpsSensor->status = GPS_ERROR_NO_FIX;
-				break;
-			}
 		}
 
-		if (gpsSerial->available() == 0)
+		return gpsSensor->status;
+	}
+
+	// got some serial data - yay
+
+	lastGPSserialDataReceived = updateMillis;
+
+	if (gpsSensor->status == GPS_ERROR_NO_DATA_RECEIVED)
+	{
+		// Now have data - but no fix
+		gpsSensor->status = GPS_ERROR_NO_FIX;
+	}
+
+	while (gpsSerial->available())
+	{
+		char ch = gpsSerial->read();
+		
+		nmea.process(ch);
+
+		if (nmea.isValid())
 		{
-			activeSerialCompatibleDelay(1);
-			continue;
-		}
-
-		while (gpsSerial->available())
-		{
-			noDataReceived = false;
-
-			char ch = gpsSerial->read();
-			nmea.process(ch);
-
-			if (nmea.isValid())
-			{
-				struct gpsReading * activeGPSReading;
-				activeGPSReading =
-					(struct gpsReading *) gpsSensor->activeReading;
-				activeGPSReading->lattitude = nmea.getLatitude() / 1000000.0;
-				activeGPSReading->longitude = nmea.getLongitude() / 1000000.0;
-				activeGPSReading->lastGPSreadingMillis = millis();
-				gpsSensor->status = SENSOR_OK;
-				notGotGPS = false;
-			}
+			activeGPSReading->lattitude = nmea.getLatitude() / 1000000.0;
+			activeGPSReading->longitude = nmea.getLongitude() / 1000000.0;
+			activeGPSReading->lastGPSreadingMillis = updateMillis;
+			gpsSensor->status = SENSOR_OK;
 		}
 	}
 
-	gpsSerial->enableRx(false);
-
+	unsigned long millisSinceGPSupate = ulongDiff(updateMillis, activeGPSReading->lastGPSreadingMillis);
+		
+	if (millisSinceGPSupate > GPS_READING_LIFETIME_MSECS)
+	{
+		gpsSensor->status = GPS_ERROR_NO_FIX;
+	}
 
 	return gpsSensor->status;
 }
@@ -111,6 +121,7 @@ int addGpsReading(struct sensor * gpsSensor, char * jsonBuffer, int jsonBufferSi
 	if (ulongDiff(millis(), activeGPSReading->lastGPSreadingMillis) < GPS_READING_LIFETIME_MSECS)
 	{
 		snprintf(jsonBuffer, jsonBufferSize, "%s,\"Lat\" : %.6f, \"Long\" : %.6f,",
+			jsonBuffer,
 			activeGPSReading->lattitude, activeGPSReading->longitude);
 	}
 
@@ -132,9 +143,6 @@ void gpsStatusMessage(struct sensor * gpsSensor, char * buffer, int bufferLength
 		else
 			snprintf(buffer, bufferLength, "GPS sensor OK Lat: %.6f Long: %.6f Fix timed out",
 				activeGPSReading->lattitude, activeGPSReading->longitude);
-		break;
-	case GPS_ERROR_NOT_IMPLEMENTED:
-		snprintf(buffer, bufferLength, "GPS sensor not implemented");
 		break;
 	case GPS_ERROR_NO_DATA_RECEIVED:
 		snprintf(buffer, bufferLength, "GPS sensor no data received");

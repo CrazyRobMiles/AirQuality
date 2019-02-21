@@ -13,6 +13,9 @@ void showDeviceStatus()
 	renderStatusDisplay();
 }
 
+unsigned long millisAtLastSend;
+bool initialPowerUp = true;
+
 void startDevice()
 {
 	if (readInputSwitch())
@@ -40,18 +43,21 @@ void startDevice()
 #define JSON_BUFFER_SIZE 2000
 char jsonBuffer[JSON_BUFFER_SIZE];
 
+
 void sendSensorReadings()
 {
-	unsigned long cycleStartMillis = millis();
+	unsigned long currentMillis = millis();
 
-	updateSensors();
-
-	createSensorJson(jsonBuffer, JSON_BUFFER_SIZE);
-
-	if (publishReadingsToMQTT(jsonBuffer))
+	if (initialPowerUp ||
+		ulongDiff(currentMillis, millisAtLastSend) > (settings.mqttSecsPerUpdate * 1000))
 	{
-		//Serial.println(jsonBuffer);
-	}
+		initialPowerUp = false;
+		millisAtLastSend = currentMillis;
+		createSensorJson(jsonBuffer, JSON_BUFFER_SIZE);
 
-	activeDelay(settings.mqttSecsPerUpdate * 1000 + 1);
+		if (publishReadingsToMQTT(jsonBuffer))
+		{
+			//Serial.println(jsonBuffer);
+		}
+	}
 }

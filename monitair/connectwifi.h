@@ -22,7 +22,7 @@
 #include "utils.h"
 #include "processes.h"
 
-#define WIFI_CONNECT_TIMEOUT_IN_SECONDS 20000
+#define WIFI_CONNECT_TIMEOUT_MILLIS 20000
 
 #define WIFI_OK 0
 #define WIFI_TURNED_OFF 1
@@ -31,6 +31,8 @@
 #define WIFI_ERROR_CONNECT_FAILED -3
 #define WIFI_ERROR_NO_MATCHING_NETWORKS -4
 #define WIFI_ERROR_DISCONNECTED -5
+
+#define WIFI_CONNECT_RETRY_MILLS 60000
 
 struct WiFiSetting
 {

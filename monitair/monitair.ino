@@ -1,8 +1,9 @@
+#include <MicroNMEA.h>
 #include <DNSServer.h>
 #include <Adafruit_NeoPixel.h>
 #include <ezTime.h>
 #include <PubSubClient.h>
-#include <SoftwareSerial.h>
+#include "SoftwareSerial.h"
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
 #include <ESP8266WebServerSecureBearSSL.h>
@@ -62,9 +63,7 @@ void setup() {
 
 void loop() 
 {
-	unsigned long cycleStartMillis = millis();
-
+	updateProcesses();
 	updateSensors();
-
 	sendSensorReadings();
 }

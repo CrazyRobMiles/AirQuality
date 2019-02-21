@@ -73,6 +73,8 @@ int startMQTT(struct process * mqttProcess)
 		return MQTT_ERROR_NO_WIFI;
 	}
 
+	Serial.println("Restarting MQTT");
+
 	if (espClient == NULL)
 	{
 		if (settings.mqttSecureSockets)
@@ -170,7 +172,6 @@ int updateMQTT(struct process * mqttProcess)
 	{
 		if (ulongDiff(millis(), timeOfLastMQTTsuccess) > MQTT_CONNECT_RETRY_INTERVAL_MSECS)
 		{
-			Serial.println("Restarting MQTT");
 			mqttProcess->status = startMQTT(mqttProcess);
 			timeOfLastMQTTsuccess = millis();
 		}

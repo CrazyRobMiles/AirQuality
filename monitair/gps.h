@@ -4,13 +4,11 @@
 
 #include "sensors.h"
 
-#define GPS_ERROR_NOT_IMPLEMENTED -1
-#define GPS_ERROR_NO_DATA_RECEIVED -2
-#define GPS_ERROR_NO_FIX -3
-
-#define GPS_READING_TIMEOUT_MSECS 1000
+#define GPS_ERROR_NO_DATA_RECEIVED -1
+#define GPS_ERROR_NO_FIX -2
 
 #define GPS_READING_LIFETIME_MSECS 5000
+#define GPS_SERIAL_DATA_TIMEOUT_MILLIS 500
 
 struct gpsReading {
 	unsigned long lastGPSreadingMillis;

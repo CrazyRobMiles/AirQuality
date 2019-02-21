@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <SoftwareSerial.h>
+#include "SoftwareSerial.h"
 
 #include "utils.h"
 #include "sensors.h"
@@ -7,8 +7,10 @@
 #include "settings.h"
 #include "processes.h"
 
+#define AIRQ_SERIAL_DATA_TIMEOUT_MILLIS 2000
+
 SoftwareSerial * airqSensorSerial = NULL;
-unsigned long airqReadingStartTime;
+unsigned long lastAirqSerialDataReceived;
 
 #define AIRQ_SENSOR_START_SEQUENCE_LENGTH 2
 
@@ -26,10 +28,31 @@ struct airqSensorStartSequence airqStartSequences[] =
 };
 
 
-int getSensorType()
+void updateAverages(airqualityReading * reading)
+{
+
+	reading->pm10AvgTotal += reading->pm10;
+	reading->pm25AvgTotal += reading->pm25;
+
+	reading->averageCount++;
+
+	if (reading->averageCount == settings.airqNoOfAverages)
+	{
+		reading->pm10Average = reading->pm10AvgTotal / settings.airqNoOfAverages;
+		reading->pm25Average = reading->pm25AvgTotal / settings.airqNoOfAverages;
+		reading->lastAirqAverageMillis = millis();
+		reading->pm10AvgTotal = 0;
+		reading->pm25AvgTotal = 0;
+		reading->averageCount = 0;
+	}
+}
+
+int getSensorType(int * sensorType)
 {
 	byte buffer;
 	int value;
+	boolean gotSerialData = false;
+	unsigned long airqReadingStartTime;
 
 	airqReadingStartTime = millis();
 
@@ -42,7 +65,10 @@ int getSensorType()
 	{
 		if (ulongDiff(millis(), airqReadingStartTime) > AIRQ_READING_TIMEOUT_MSECS)
 		{
-			return AIRQ_ERROR_TIMED_OUT;
+			if (gotSerialData)
+				return AIRQ_SENSOR_NOT_RECOGNIZED_AT_START;
+			else
+				return AIRQ_NO_SENSOR_DETECTED_AT_START;
 		}
 
 		if (airqSensorSerial->available() == 0)
@@ -50,6 +76,8 @@ int getSensorType()
 			delay(1);
 			continue;
 		}
+
+		gotSerialData = true;
 
 		buffer = airqSensorSerial->read();
 
@@ -63,7 +91,8 @@ int getSensorType()
 				if (airqStartSequences[i].pos == AIRQ_SENSOR_START_SEQUENCE_LENGTH)
 				{
 					// found a match to the sensor
-					return airqStartSequences[i].sensorType;
+					*sensorType = airqStartSequences[i].sensorType;
+					return SENSOR_OK;
 				}
 			}
 			else
@@ -96,15 +125,13 @@ int startAirq(struct sensor * airqSensor)
 		airqSensorSerial->begin(9600);
 	}
 
-	int sensorType = getSensorType();
+	int sensorType;
 
-	// Turn off interrupts until we need a reading
-	airqSensorSerial->enableRx(false);
+	int getSensorTypeResult = getSensorType(&sensorType);
 
-	if (sensorType == AIRQ_ERROR_TIMED_OUT)
+	if (getSensorTypeResult != SENSOR_OK)
 	{
-		airqSensor->status = AIRQ_ERROR_TIMED_OUT;
-		return AIRQ_ERROR_TIMED_OUT;
+		return getSensorTypeResult;
 	}
 
 	if (sensorType != settings.airqSensorType)
@@ -113,188 +140,196 @@ int startAirq(struct sensor * airqSensor)
 		saveSettings();
 	}
 
-	airqSensor->status = SENSOR_OK;
-	return SENSOR_OK;
+	lastAirqSerialDataReceived = millis();
+
+	airqSensor->status = AIRQ_NO_DATA_RECEIVED;
+	return AIRQ_NO_DATA_RECEIVED;
 }
 
-boolean getSDS011reading(airqualityReading * result)
+int sds011Len = 0;
+int sds011Pm10Serial = 0;
+int sds011PM25Serial = 0;
+byte sds011CalcChecksum;
+byte sds011RecChecksum;
+int sds011ChecksumOK = 0;
+
+boolean pumpSDS011Byte(airqualityReading * result, byte sds011Value)
 {
-	// turn on the serial port 
-	airqSensorSerial->enableRx(true);
-
-	airqReadingStartTime = millis();
-
-	byte sds011Buffer;
-	int sds011Value;
-	int sds011Len = 0;
-	int sds011Pm10Serial = 0;
-	int sds011PM25Serial = 0;
-	int sds011CalcChecksum;
-	int sds011ChecksumOK = 0;
-	boolean sds011GotValue = false;
-
-	while (true)
-	{
-		if (ulongDiff(millis(), airqReadingStartTime) > AIRQ_READING_TIMEOUT_MSECS)
-		{
-			sds011GotValue = false;
-			break;
-		}
-
-		if (airqSensorSerial->available() == 0)
-		{
-			activeSerialCompatibleDelay(1);
-			continue;
-		}
-
-		sds011Buffer = airqSensorSerial->read();
-
-		sds011Value = int(sds011Buffer);
-
-		switch (sds011Len) {
-		case (0): if (sds011Value != 170) { sds011Len = -1; }; break;
-		case (1): if (sds011Value != 192) { sds011Len = -1; }; break;
-		case (2): sds011PM25Serial = sds011Value; sds011CalcChecksum = sds011Value; break;
-		case (3): sds011PM25Serial += (sds011Value << 8); sds011CalcChecksum += sds011Value; break;
-		case (4): sds011Pm10Serial = sds011Value; sds011CalcChecksum += sds011Value; break;
-		case (5): sds011Pm10Serial += (sds011Value << 8); sds011CalcChecksum += sds011Value; break;
-		case (6): sds011CalcChecksum += sds011Value; break;
-		case (7): sds011CalcChecksum += sds011Value; break;
-		case (8): if (sds011Value == (sds011CalcChecksum % 256)) { sds011ChecksumOK = 1; }
-				  else { sds011Len = -1; }; break;
-		case (9): if (sds011Value != 171) { sds011Len = -1; }; break;
-		}
-
-		sds011Len++;
-
-		if (sds011Len == 10 && sds011ChecksumOK == 1) {
-			result->pm10 = (float)sds011Pm10Serial / 10.0;
-			result->pm25 = (float)sds011PM25Serial / 10.0;
-			sds011GotValue = true;
-			break;
-		}
+	switch (sds011Len) {
+	case (0): if (sds011Value != 170) { sds011Len = -1; }; break;
+	case (1): if (sds011Value != 192) { sds011Len = -1; }; break;
+	case (2): sds011PM25Serial = sds011Value; sds011CalcChecksum = sds011Value; break;
+	case (3): sds011PM25Serial += (sds011Value << 8); sds011CalcChecksum += sds011Value; break;
+	case (4): sds011Pm10Serial = sds011Value; sds011CalcChecksum += sds011Value; break;
+	case (5): sds011Pm10Serial += (sds011Value << 8); sds011CalcChecksum += sds011Value; break;
+	case (6): sds011CalcChecksum += sds011Value; break;
+	case (7): sds011CalcChecksum += sds011Value; break;
+	case (8): sds011RecChecksum = sds011Value; if (sds011Value == (sds011CalcChecksum % 256)) { sds011ChecksumOK = 1; }
+			  else { sds011Len = -1; }; break;
+	case (9): if (sds011Value != 171) { sds011Len = -1; }; break;
 	}
 
-	// turn off the serial port 
+	sds011Len++;
 
-	airqSensorSerial->enableRx(false);
-
-	return sds011GotValue;
-}
-
-boolean getXPH01reading(airqualityReading * result)
-{
-	// turn on the serial port 
-	airqSensorSerial->enableRx(true);
-
-	airqReadingStartTime = millis();
-
-	byte buffer;
-	int value;
-	int len = 0;
-	float pm25_serial = 0;
-	byte checksum_is;
-	boolean gotValue = false;
-
-	while (true)
+	if (sds011Len == 10)
 	{
-		if (ulongDiff(millis(), airqReadingStartTime) > AIRQ_READING_TIMEOUT_MSECS)
+		sds011Len = 0;
+		if (sds011ChecksumOK == 1)
 		{
-			gotValue = false;
-			break;
-		}
+			float pm10 = sds011Pm10Serial / 10.0;
+			float pm25 = sds011PM25Serial / 10.0;
 
-		if (airqSensorSerial->available() == 0)
+			result->pm10 = pm10;
+			result->pm25 = pm25;
+
+			result->pm10AvgTotal += pm10;
+			result->pm25AvgTotal += pm25;
+			result->lastAirqreadingMillis = millis();
+
+			updateAverages(result);
+			return true;
+		}
+		else
 		{
-			activeSerialCompatibleDelay(1);
-			continue;
-		}
+			Serial.print("BDCHK:");
+			Serial.print(' ');
+			Serial.print(sds011CalcChecksum);
+			Serial.print(' ');
+			Serial.print(sds011RecChecksum);
+			Serial.print(' ');
+			Serial.println(sds011RecChecksum - sds011CalcChecksum);
 
-		buffer = airqSensorSerial->read();
-
-		Serial.print(buffer, HEX);
-		Serial.print(" ");
-
-		value = int(buffer);
-
-		switch (len) {
-		case (0): if (value != 0xFF) { len = -1; }; break;
-		case (1): if (value != 0x18) { len = -1; }
-				  else { checksum_is = value; }; break;
-		case (2): if (value != 0) { len = -1; }; break;
-		case (3): pm25_serial = value; checksum_is += value; break;
-		case (4): pm25_serial += (value / 100.0); checksum_is += value; break;
-		case (5): checksum_is += value; break;
-		case (6): if (value != 0x01) { len = -1; }
-				  else { checksum_is += value; }; break;
-		case (7): checksum_is += value; break;
-		case (8):  break;
-		}
-
-		len++;
-
-		if (len == 9)
-		{
-			checksum_is = (~checksum_is) + 1;
-			if (value == checksum_is)
-			{
-				result->pm10 = -1;
-				result->pm25 = pm25_serial;
-				gotValue = true;
-				break;
-			}
 		}
 	}
-
-	// turn off the serial port 
-
-	airqSensorSerial->enableRx(false);
-
-	return gotValue;
+	return false;
 }
+
+int zph01Len = 0;
+byte zph01CalcChecksum;
+byte zph01RecChecksum;
+float zph01Pm25Serial = 0;
+
+boolean pumpZPH01Byte(airqualityReading * result, byte zph01Value)
+{
+	boolean gotResult = false;
+
+	switch (zph01Len) {
+	case (0): if (zph01Value != 0xFF) { zph01Len = -1; }; break;
+	case (1): if (zph01Value != 0x18) { zph01Len = -1; }
+			  else { zph01CalcChecksum = zph01Value; }; break;
+	case (2): if (zph01Value != 0) { zph01Len = -1; }; break;
+	case (3): zph01Pm25Serial = zph01Value; zph01CalcChecksum += zph01Value; break;
+	case (4): zph01Pm25Serial += (zph01Value / 100.0); zph01CalcChecksum += zph01Value; break;
+	case (5): zph01CalcChecksum += zph01Value; break;
+	case (6): if (zph01Value != 0x01) { zph01Len = -1; }
+			  else { zph01CalcChecksum += zph01Value; }; break;
+	case (7): zph01CalcChecksum += zph01Value; break;
+	case (8):  break;
+	}
+
+	zph01Len++;
+
+	if (zph01Len == 9)
+	{
+		zph01CalcChecksum = (~zph01CalcChecksum) + 1;
+
+		if (zph01Value == zph01CalcChecksum)
+		{
+			float pm25 = zph01Pm25Serial * 20;
+
+			result->pm25 = pm25;
+			result->pm10 = -1;
+			result->lastAirqreadingMillis = millis();
+
+			updateAverages(result);
+
+			gotResult = true;
+		}
+		else
+		{
+			//Serial.print("BDCHK:");
+			//Serial.print(zph01Value);
+			//Serial.print(' ');
+			//Serial.print(zph01CalcChecksum);
+			//Serial.print(' ');
+			//Serial.println(zph01Value - zph01CalcChecksum);
+		}
+		zph01Len = 0;
+	}
+
+	return gotResult;
+}
+
 
 int updateAirqReading(struct sensor * airqSensor)
 {
-	boolean gotReading = false;
-
-	// fake the reading
+	unsigned long updateMillis = millis();
 
 	struct airqualityReading * airqualityActiveReading =
 		(airqualityReading *)airqSensor->activeReading;
 
-	//airqualityActiveReading->pm10 = 10.0;
-	//airqualityActiveReading->pm25 = 2.5;
+	int ch;
+	boolean gotReading;
 
-	//activeSerialCompatibleDelay(1);
-
-	//return SENSOR_OK;
-
-	switch (settings.airqSensorType)
+	if (airqSensorSerial->available() == 0)
 	{
-	case 1: // sds011
-		gotReading = getSDS011reading(airqualityActiveReading);
-		break;
+		if (airqSensor->status != AIRQ_NO_DATA_RECEIVED)
+		{
+			unsigned long timeSinceLastSerialData = ulongDiff(updateMillis, lastAirqSerialDataReceived);
 
-	case 2: // XPH01
-		gotReading = getXPH01reading(airqualityActiveReading);
-		break;
-	}
-
-	if (gotReading)
-	{
-		airqSensor->millisAtLastReading = millis();
-		airqSensor->status = SENSOR_OK;
+			// if the data timeout has expired, change the state
+			if (timeSinceLastSerialData > AIRQ_SERIAL_DATA_TIMEOUT_MILLIS)
+				airqSensor->status = AIRQ_NO_DATA_RECEIVED;
+		}
 	}
 	else
 	{
-		airqSensor->status = AIRQ_ERROR_TIMED_OUT;
+		lastAirqSerialDataReceived = updateMillis;
+
+		while (airqSensorSerial->available())
+		{
+			switch (airqSensor->status)
+			{
+			case AIRQ_NO_DATA_RECEIVED:
+				airqSensor->status = AIRQ_NO_READING_DECODED;
+				break;
+
+			case AIRQ_NO_READING_DECODED:
+			case SENSOR_OK:
+				ch = airqSensorSerial->read();
+
+				switch (settings.airqSensorType)
+				{
+				case SDS011_SENSOR:
+					gotReading = pumpSDS011Byte(airqualityActiveReading, (byte)ch);
+					break;
+				case ZPH01_SENSOR:
+					gotReading = pumpZPH01Byte(airqualityActiveReading, (byte) ch);
+					break;
+				}
+
+				if (gotReading)
+					airqSensor->status = SENSOR_OK;
+
+				break;
+
+			case AIRQ_NO_SENSOR_DETECTED_AT_START:
+			case AIRQ_SENSOR_NOT_RECOGNIZED_AT_START:
+				startAirq(airqSensor);
+				break;
+			}
+		}
 	}
 	return airqSensor->status;
 }
 
+
 int addAirqReading(struct sensor * airqSensor, char * jsonBuffer, int jsonBufferSize)
 {
-	if (airqSensor->status == SENSOR_OK)
+	struct airqualityReading * airqualityActiveReading =
+		(airqualityReading *)airqSensor->activeReading;
+
+	if (ulongDiff(millis(), airqualityActiveReading->lastAirqreadingMillis) < AIRQ_READING_LIFETIME_MSECS)
 	{
 		struct airqualityReading * airqualityActiveReading =
 			(airqualityReading *)airqSensor->activeReading;
@@ -307,7 +342,7 @@ int addAirqReading(struct sensor * airqSensor, char * jsonBuffer, int jsonBuffer
 				airqualityActiveReading->pm10, airqualityActiveReading->pm25);
 			return SENSOR_OK;
 
-		case 2: // XPH01
+		case 2: // ZPH01
 			snprintf(jsonBuffer, jsonBufferSize, "%s,\"PM25\":%.2f",
 				jsonBuffer,
 				airqualityActiveReading->pm25);
@@ -325,15 +360,18 @@ void airqStatusMessage(struct sensor * airqSensor, char * buffer, int bufferLeng
 
 	switch (settings.airqSensorType)
 	{
-	case SDS011_SENSOR:
-		snprintf(buffer, bufferLength, "SDS011 sensor:");
-		break;
 	case ZPH01_SENSOR:
-		snprintf(buffer, bufferLength, "ZPH01 sensor:");
+		snprintf(buffer, bufferLength, "ZPH01 sensor ");
 		break;
+
+	case SDS011_SENSOR:
+		snprintf(buffer, bufferLength, "SDS011 sensor ");
+		break;
+
 	default:
-		snprintf(buffer, bufferLength, "Unknown sensor:");
+		snprintf(buffer, bufferLength, "Unknown sensor ");
 		break;
+
 	}
 
 	switch (airqSensor->status)
@@ -346,12 +384,24 @@ void airqStatusMessage(struct sensor * airqSensor, char * buffer, int bufferLeng
 		snprintf(buffer, bufferLength, "%s OFF", buffer);
 		break;
 
-	case AIRQ_ERROR_TIMED_OUT:
-		snprintf(buffer, bufferLength, "%s Timed Out", buffer);
+	case AIRQ_NO_SENSOR_DETECTED_AT_START:
+		snprintf(buffer, bufferLength, "No sensor detected at start");
+		break;
+
+	case AIRQ_NO_READING_DECODED:
+		snprintf(buffer, bufferLength, "%s data received but not decoded", buffer);
+		break;
+
+	case AIRQ_NO_DATA_RECEIVED:
+		snprintf(buffer, bufferLength, "%s no data received", buffer);
+		break;
+
+	case AIRQ_SENSOR_NOT_RECOGNIZED_AT_START:
+		snprintf(buffer, bufferLength, "Sensor not recognised at start");
 		break;
 
 	default:
-		snprintf(buffer, bufferLength, "Airq status invalid");
+		snprintf(buffer, bufferLength, "%s Airq status invalid", buffer);
 		break;
 	}
 }

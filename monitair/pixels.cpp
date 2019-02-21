@@ -360,7 +360,7 @@ void fadeWalkingColours(struct VirtualPixel * lamps, ColourValue * newColours, i
 	}
 }
 
-enum readingDisplayStates { veryLow, lowWarn, lowMid, lowHigh, highHigh, alert, sensorFailed };
+enum readingDisplayStates { veryLow, lowWarn, lowMid, lowHigh, highHigh, alert, sensorFailed, noAverage };
 
 readingDisplayStates displayState;
 
@@ -385,6 +385,7 @@ readingDisplayStates getDisplayStateFromValue(float value)
 }
 
 struct ColourValue badAirQReadingColours[] = { BLUE_PIXEL_COLOUR, RED_PIXEL_COLOUR };
+struct ColourValue noAverageAirQReadingColours[] = { YELLOW_PIXEL_COLOUR, GREEN_PIXEL_COLOUR };
 
 void setDisplayState(readingDisplayStates newState)
 {
@@ -393,29 +394,29 @@ void setDisplayState(readingDisplayStates newState)
 	switch (displayState)
 	{
 	case veryLow:
-		ColourValue baseValue;
-		baseValue.r = (float)settings.pixelRed / 255;
-		baseValue.g = (float)settings.pixelGreen / 255;
-		baseValue.b = (float)settings.pixelBlue / 255;
-		fadeWalkingColour(lamps, baseValue, 100);
+		fadeWalkingColour(lamps, GREEN_PIXEL_COLOUR, 100);
 		break;
 	case lowWarn:
 		fadeWalkingColour(lamps, YELLOW_PIXEL_COLOUR, 100);
 		break;
 	case lowMid:
-		fadeWalkingColour(lamps, BLUE_PIXEL_COLOUR, 100);
+		fadeWalkingColour(lamps, ORANGE_PIXEL_COLOUR, 100);
 		break;
 	case lowHigh:
-		fadeWalkingColour(lamps, CYAN_PIXEL_COLOUR, 100);
+		fadeWalkingColour(lamps, RED_PIXEL_COLOUR, 100);
 		break;
 	case highHigh:
 		fadeWalkingColour(lamps, MAGENTA_PIXEL_COLOUR, 100);
 		break;
 	case alert:
-		fadeWalkingColour(lamps, RED_PIXEL_COLOUR, 100);
+		fadeWalkingColour(lamps, WHITE_PIXEL_COLOUR, 100);
 		break;
 	case sensorFailed:
 		fadeWalkingColours(lamps, badAirQReadingColours, sizeof(badAirQReadingColours) / sizeof(struct ColourValue),
+			100);
+		break;
+	case noAverage:
+		fadeWalkingColours(lamps, noAverageAirQReadingColours, sizeof(noAverageAirQReadingColours) / sizeof(struct ColourValue),
 			100);
 		break;
 	}
@@ -437,7 +438,17 @@ void updateReadingDisplay()
 	{
 		airqualityReading * sourceAirqReading = 
 			(airqualityReading *) sourceAirqSensor->activeReading;
-		newDisplayState = getDisplayStateFromValue(sourceAirqReading->pm25);
+
+		unsigned long millisSinceAverage = ulongDiff(millis(), sourceAirqReading->lastAirqAverageMillis);
+
+		if (millisSinceAverage < AIRQ_AVERAGE_LIFETIME_MSECS)
+		{
+			newDisplayState = getDisplayStateFromValue(sourceAirqReading->pm25Average);
+		}
+		else
+		{
+			newDisplayState = noAverage;
+		}
 	}
 	else
 	{

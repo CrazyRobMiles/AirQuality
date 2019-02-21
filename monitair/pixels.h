@@ -24,6 +24,7 @@ struct ColourValue {
 #define GREEN_PIXEL_COLOUR {0,1,0}
 #define BLUE_PIXEL_COLOUR {0,0,1}
 #define YELLOW_PIXEL_COLOUR {1,1,0}
+#define ORANGE_PIXEL_COLOUR {1,165.0/255.0,0}
 #define MAGENTA_PIXEL_COLOUR {1,0,1}
 #define CYAN_PIXEL_COLOUR {0,1,1}
 #define WHITE_PIXEL_COLOUR {1,1,1}

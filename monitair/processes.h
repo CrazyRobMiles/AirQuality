@@ -13,7 +13,6 @@ struct process
 	void(*getStatusMessage)(struct process *, char * buffer, int bufferLength);
 	boolean activeAtStart;
 	boolean beingUpdated;  // true if the process is running
-	boolean compatibleWithSerial; // true if this process can be updated when the serial port is active
 	int status;      // zero means OK - any other value is an error state
 	unsigned long activeTime;
 };

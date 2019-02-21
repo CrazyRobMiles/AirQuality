@@ -274,29 +274,35 @@ boolean validateColour(void * dest, const char * newValueStr)
 void setDefaultAirqLowLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 1;
+	*destInt = 54;
 }
 
 void setDefaultAirqLowWarnLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 2;
+	*destInt = 154;
 }
 
 
 void setDefaultAirqMidWarnLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 3;
+	*destInt = 254;
 }
 
 void setDefaultAirqHighWarnLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 4;
+	*destInt = 354;
 }
 
 void setDefaultAirqHighAlertLimit(void * dest)
+{
+	int * destInt = (int *)dest;
+	*destInt = 424;
+}
+
+void setDefaultAirqnoOfAverages(void * dest)
 {
 	int * destInt = (int *)dest;
 	*destInt = 5;
@@ -317,7 +323,8 @@ struct SettingItem pixelSettingItems[] =
 	"AirQ Low Warning Limit", "airqlowwarnlimit", &settings.airqLowWarnLimit, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqLowWarnLimit, validateInt,
 	"AirQ Mid Warning Limit", "airqmidwarnlimit", &settings.airqMidWarnLimit, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqMidWarnLimit, validateInt,
 	"AirQ High Warning Limit", "airqhighwarnlimit", &settings.airqHighWarnLimit, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqHighWarnLimit, validateInt,
-	"AirQ High Warning Limit", "airqhighalertlimit", &settings.airqHighAlertLimit, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqHighAlertLimit, validateInt,
+	"AirQ High Alert Limit", "airqhighalertlimit", &settings.airqHighAlertLimit, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqHighAlertLimit, validateInt,
+	"AirQ Number of averages", "airqnoOfAverages", &settings.airqNoOfAverages, NUMBER_INPUT_LENGTH, integerValue, setDefaultAirqnoOfAverages, validateInt,
 };
 
 void setDefaultAirQSensorType(void * dest)
@@ -381,7 +388,7 @@ struct SettingItem hardwareSettingItems[] =
 	"Control Input Active Low", "controlinputlow", &settings.controlInputPinActiveLow, ONOFF_INPUT_LENGTH, yesNo, setTrue, validateYesNo,
 	"GPS fitted", "gpsfitted", &settings.gpsFitted, ONOFF_INPUT_LENGTH, yesNo, setFalse,validateYesNo,
 	"GPS RX Pin", "gpsrxpin", &settings.gpsRXPinNo, NUMBER_INPUT_LENGTH, integerValue, setDefaultGpsPinNo, validateInt,
-	"Number of pixels (0 for pixels not fitted)", "noofpixels", &settings.noOfPixels, NUMBER_INPUT_LENGTH, integerValue, setDefaultGpsPinNo, validateInt,
+	"Number of pixels (0 for pixels not fitted)", "noofpixels", &settings.noOfPixels, NUMBER_INPUT_LENGTH, integerValue, setDefaultNoOfPixels, validateInt,
 	"Pixel Control Pin", "pixelcontrolpin", &settings.pixelControlPinNo, NUMBER_INPUT_LENGTH, integerValue, setDefaultPixelControlPinNo, validateInt,
 };
 

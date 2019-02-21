@@ -14,14 +14,14 @@
 #define STATUS_DESCRIPTION_LENGTH 200
 
 
-struct process PixelProcess = { "Pixel", startPixel, updatePixel, stopPixel, pixelStatusMessage, true, false, true, 0, 0 };
-struct process WiFiProcessDescriptor = { "WiFi", startWifi, updateWifi, stopWiFi, wifiStatusMessage, true, false, false, 0, 0 };
-struct process ConsoleProcessDescriptor = { "Console", startConsole, updateConsole, stopConsole, consoleStatusMessage, true, false, false, 0, 0 };
-struct process WebServerProcessDescriptor = { "Webserver", startWebServer, updateWebServer, stopWebserver, webserverStatusMessage, false, false, false, 0, 0 }; // don't start the web server by default
-struct process MQTTProcessDescriptor = { "MQTT", startMQTT, updateMQTT, stopMQTT, mqttStatusMessage, true,  false, false, 0, 0 };
-struct process OTAUpdateProcess = { "OTA", startOtaUpdate, updateOtaUpdate, stopOtaUpdate, otaUpdateStatusMessage, false, false, false, 0, 0 }; // don't start the ota update by default
-struct process InputSwitchProcess = { "Input switch", startInputSwitch, updateInputSwitch, stopInputSwitch, inputSwitchStatusMessage, true, false, true, 0, 0 };
-struct process WiFiConfigProcess = { "Wifi Config", startWifiConfig, updateWifiConfig, stopWifiConfig, wifiConfigStatusMessage, true, false, true, 0, 0 };
+struct process PixelProcess = { "Pixel", startPixel, updatePixel, stopPixel, pixelStatusMessage, true, false, 0, 0 };
+struct process WiFiProcessDescriptor = { "WiFi", startWifi, updateWifi, stopWiFi, wifiStatusMessage, true, false, 0, 0 };
+struct process ConsoleProcessDescriptor = { "Console", startConsole, updateConsole, stopConsole, consoleStatusMessage, true, false, 0, 0 };
+struct process WebServerProcessDescriptor = { "Webserver", startWebServer, updateWebServer, stopWebserver, webserverStatusMessage, false, false, 0, 0 }; // don't start the web server by default
+struct process MQTTProcessDescriptor = { "MQTT", startMQTT, updateMQTT, stopMQTT, mqttStatusMessage, true,  false, 0, 0 };
+struct process OTAUpdateProcess = { "OTA", startOtaUpdate, updateOtaUpdate, stopOtaUpdate, otaUpdateStatusMessage, false, false, 0, 0 }; // don't start the ota update by default
+struct process InputSwitchProcess = { "Input switch", startInputSwitch, updateInputSwitch, stopInputSwitch, inputSwitchStatusMessage, true, false, 0, 0 };
+struct process WiFiConfigProcess = { "Wifi Config", startWifiConfig, updateWifiConfig, stopWifiConfig, wifiConfigStatusMessage, true, false, 0, 0 };
 
 struct process * runningProcessList[] =
 {
@@ -136,36 +136,6 @@ void updateProcesses()
 		{
 			updateProcess(runningProcessList[i]);
 		}
-	}
-}
-
-void updateSerialCompatibleProcesses()
-{
-	for (int i = 0; i < sizeof(runningProcessList) / sizeof(struct process *); i++)
-	{
-		if (runningProcessList[i]->compatibleWithSerial &&
-			runningProcessList[i]->beingUpdated)
-		{
-			updateProcess(runningProcessList[i]);
-		}
-	}
-}
-
-void activeDelay(long delayTime)
-{
-	for (int i = 0; i < delayTime; i++)
-	{
-		updateProcesses();
-		delay(1);
-	}
-}
-
-void activeSerialCompatibleDelay(long delayTime)
-{
-	for (int i = 0; i < delayTime; i++)
-	{
-		updateSerialCompatibleProcesses();
-		delay(1);
 	}
 }
 

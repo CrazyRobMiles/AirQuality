@@ -38,17 +38,26 @@ int findWifiSetting(String ssidName)
 char wifiActiveAPName[WIFI_SSID_LENGTH];
 int wifiError;
 
+boolean firstRun = true;
+unsigned long lastWiFiConnectAtteptMillis;
+
 
 int startWifi(struct process * wifiProcess)
 {
+	lastWiFiConnectAtteptMillis = millis();
 	int setting_number;
+	Serial.println("Starting WiFi");
 
 	// stop the device from being an access point when you don't want it 
 
-	WiFi.mode(WIFI_OFF);
-	delay(500);
-	WiFi.mode(WIFI_STA);
-	delay(500);
+	if (firstRun)
+	{
+		WiFi.mode(WIFI_OFF);
+		delay(500);
+		WiFi.mode(WIFI_STA);
+		delay(500);
+		firstRun = false;
+	}
 
 	int noOfNetworks = WiFi.scanNetworks();
 
@@ -70,7 +79,7 @@ int startWifi(struct process * wifiProcess)
 			while (WiFi.status() != WL_CONNECTED)
 			{
 				delay(500);
-				if (ulongDiff(millis(), connectStartTime) > WIFI_CONNECT_TIMEOUT_IN_SECONDS)
+				if (ulongDiff(millis(), connectStartTime) > WIFI_CONNECT_TIMEOUT_MILLIS)
 				{
 					WiFi.disconnect();
 					wifiProcess->status = WIFI_ERROR_CONNECT_TIMEOUT;
@@ -110,8 +119,13 @@ int updateWifi(struct process * wifiProcess)
 	}
 	else
 	{
-		Serial.println("Restarting WiFi");
-		wifiProcess->status = startWifi(wifiProcess);
+		unsigned long millisSinceWiFiConnectAttempt =
+			ulongDiff(millis(), lastWiFiConnectAtteptMillis);
+
+		if (millisSinceWiFiConnectAttempt > WIFI_CONNECT_RETRY_MILLS)
+		{
+			wifiProcess->status = startWifi(wifiProcess);
+		}
 	}
 
 	return wifiProcess->status;

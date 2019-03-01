@@ -60,6 +60,8 @@ public:
 
   void rxRead();
 
+  volatile boolean SerialBusy = false;
+
   // AVR compatibility methods
   bool listen() { enableRx(true); return true; }
   void end() { stopListening(); }

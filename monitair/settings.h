@@ -3,12 +3,13 @@
 #include <Arduino.h>
 
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 3
+#define MINOR_VERSION 4
 
 // Sensor settings
 #define UNKNOWN_SENSOR 0
 #define SDS011_SENSOR 1
 #define ZPH01_SENSOR 2
+#define PMS5003_SENSOR 3
 
 #define DEVICE_NAME_LENGTH 20
 

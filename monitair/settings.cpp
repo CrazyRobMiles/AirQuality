@@ -274,32 +274,32 @@ boolean validateColour(void * dest, const char * newValueStr)
 void setDefaultAirqLowLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 54;
+	*destInt = 15;
 }
 
 void setDefaultAirqLowWarnLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 154;
+	*destInt = 40;
 }
 
 
 void setDefaultAirqMidWarnLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 254;
+	*destInt = 65;
 }
 
 void setDefaultAirqHighWarnLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 354;
+	*destInt = 150;
 }
 
 void setDefaultAirqHighAlertLimit(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 424;
+	*destInt = 250;
 }
 
 void setDefaultAirqnoOfAverages(void * dest)
@@ -458,7 +458,8 @@ void printSetting(SettingItem * item)
 		break;
 
 	case password:
-		Serial.println("******");
+		Serial.println((char *)item->value);
+//		Serial.println("******");
 		break;
 
 	case integerValue:
@@ -496,6 +497,74 @@ void printSetting(SettingItem * item)
 		break;
 	}
 }
+
+
+void appendSettingJSON(SettingItem * item, char * jsonBuffer, int bufferLength)
+{
+
+
+	int * intValuePointer;
+	boolean * boolValuePointer;
+	double * doubleValuePointer;
+
+	snprintf(jsonBuffer, bufferLength,
+		"%s,\"%s\":",
+		jsonBuffer,
+		item->formName);
+
+	switch (item->settingType)
+	{
+
+	case text:
+		snprintf(jsonBuffer, bufferLength,
+			"%s\"%s\"",
+			jsonBuffer,
+			(char *)item->value);
+		break;
+
+	case password:
+		Serial.println("******");
+		snprintf(jsonBuffer, bufferLength,
+			"%s\"******\"",
+			jsonBuffer);
+		break;
+
+	case integerValue:
+		intValuePointer = (int*)item->value;
+		Serial.println(*intValuePointer);
+		break;
+
+	case doubleValue:
+		doubleValuePointer = (double *)item->value;
+		Serial.println(*doubleValuePointer);
+		break;
+
+	case onOff:
+		boolValuePointer = (boolean*)item->value;
+		if (*boolValuePointer)
+		{
+			Serial.println("on");
+		}
+		else
+		{
+			Serial.println("off");
+		}
+		break;
+
+	case yesNo:
+		boolValuePointer = (boolean*)item->value;
+		if (*boolValuePointer)
+		{
+			Serial.println("yes");
+		}
+		else
+		{
+			Serial.println("no");
+		}
+		break;
+	}
+}
+
 
 void resetSetting(SettingItem * setting)
 {
@@ -725,8 +794,6 @@ void testSettingsStorage()
 	else
 		Serial.println("Something wrong with setting storage");
 }
-
-
 
 void setupSettings()
 {

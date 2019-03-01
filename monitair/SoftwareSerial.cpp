@@ -47,6 +47,8 @@ void ICACHE_RAM_ATTR sws_isr_13() { ObjList[13]->rxRead(); };
 void ICACHE_RAM_ATTR sws_isr_14() { ObjList[14]->rxRead(); };
 void ICACHE_RAM_ATTR sws_isr_15() { ObjList[15]->rxRead(); };
 
+static boolean SerialBusy = false;
+
 static void(*ISRList[MAX_PIN + 1])() = {
 	  sws_isr_0,
 	  sws_isr_1,
@@ -283,6 +285,7 @@ void ICACHE_RAM_ATTR SoftwareSerial::rxRead() {
 
 	switch (m_getByteState)
 	{
+
 	case awaitingStart:
 		if (!rxLevel)
 		{

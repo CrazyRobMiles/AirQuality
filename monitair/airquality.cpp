@@ -24,7 +24,8 @@ struct airqSensorStartSequence
 struct airqSensorStartSequence airqStartSequences[] =
 {
 	{ SDS011_SENSOR, {170,192}, 0 },
-	{ ZPH01_SENSOR, {0xFF,0x18}, 0 }
+	{ ZPH01_SENSOR, {0xFF,0x18}, 0 },
+    { PMS5003_SENSOR, {0x42, 0x4D}, 0}
 };
 
 
@@ -155,6 +156,9 @@ int sds011ChecksumOK = 0;
 
 boolean pumpSDS011Byte(airqualityReading * result, byte sds011Value)
 {
+	//Serial.print(sds011Value, HEX);
+	//Serial.print(' ');
+
 	switch (sds011Len) {
 	case (0): if (sds011Value != 170) { sds011Len = -1; }; break;
 	case (1): if (sds011Value != 192) { sds011Len = -1; }; break;
@@ -179,11 +183,14 @@ boolean pumpSDS011Byte(airqualityReading * result, byte sds011Value)
 			float pm10 = sds011Pm10Serial / 10.0;
 			float pm25 = sds011PM25Serial / 10.0;
 
+			//Serial.print("PM10:");
+			//Serial.println(pm10);
+			//Serial.print("PM25:");
+			//Serial.println(pm25);
+
 			result->pm10 = pm10;
 			result->pm25 = pm25;
 
-			result->pm10AvgTotal += pm10;
-			result->pm25AvgTotal += pm25;
 			result->lastAirqreadingMillis = millis();
 
 			updateAverages(result);
@@ -198,9 +205,9 @@ boolean pumpSDS011Byte(airqualityReading * result, byte sds011Value)
 			Serial.print(sds011RecChecksum);
 			Serial.print(' ');
 			Serial.println(sds011RecChecksum - sds011CalcChecksum);
-
 		}
 	}
+
 	return false;
 }
 
@@ -247,18 +254,101 @@ boolean pumpZPH01Byte(airqualityReading * result, byte zph01Value)
 		}
 		else
 		{
-			//Serial.print("BDCHK:");
-			//Serial.print(zph01Value);
-			//Serial.print(' ');
-			//Serial.print(zph01CalcChecksum);
-			//Serial.print(' ');
-			//Serial.println(zph01Value - zph01CalcChecksum);
+			Serial.print("BDCHK:");
+			Serial.print(zph01Value);
+			Serial.print(' ');
+			Serial.print(zph01CalcChecksum);
+			Serial.print(' ');
+			Serial.println(zph01Value - zph01CalcChecksum);
 		}
 		zph01Len = 0;
 	}
 
 	return gotResult;
 }
+
+int pms5003Len = 0;
+int pms5003Pm10Serial = 0;
+int pms5003Pm25Serial = 0;
+unsigned int pms5003CalcChecksum;
+unsigned int pms5003RecChecksum;
+
+boolean pumppms5003Byte(airqualityReading * result, byte pms5003Value)
+{
+
+
+	switch (pms5003Len) {
+	case (0): if (pms5003Value != 0x42) { pms5003Len = -1; }; pms5003CalcChecksum = 0x42; break;
+	case (1): if (pms5003Value != 0x4d) { pms5003Len = -1; }; pms5003CalcChecksum += pms5003Value;  break;
+	case (2): /* Frame Length High:*/  if (pms5003Value != 0) { pms5003Len = -1; }; pms5003CalcChecksum += pms5003Value; break;
+	case (3): /* Frame Length Low:*/  if (pms5003Value != 0x1c) { pms5003Len = -1; }; pms5003CalcChecksum += pms5003Value; break;
+	case (4): /* PM1 standard particle High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (5): /* PM1 standard particle Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (6): /* PM25 standard particle High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (7): /* PM25 standard particle Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (8): /* PM10 standard particle High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (9): /* PM10 standard particle Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (10): /* PM10 mgram/m3 High:*/ pms5003Pm10Serial = pms5003Value; pms5003CalcChecksum += pms5003Value; break;
+	case (11): /* PM10 mgram/m3 Low:*/ pms5003Pm10Serial = (pms5003Pm10Serial<<8) + pms5003Value; pms5003CalcChecksum += pms5003Value; break;
+	case (12): /* PM25 mgram/m3 High:*/  pms5003Pm25Serial = pms5003Value;  pms5003CalcChecksum += pms5003Value; break;
+	case (13): /* PM25 mgram/m3 Low:*/  pms5003Pm25Serial = (pms5003Pm25Serial << 8) + pms5003Value;  pms5003CalcChecksum += pms5003Value; break;
+	case (14): /* Cocentration Unit High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (15): /* Concentration Unit Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (16): /* Particles>0.3um in 1 li High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (17): /* Particles>0.3um in 1 li Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (18): /* Particles>0.5um in 1 li High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (19): /* Particles>0.5um in 1 li Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (20): /* Particles>1.0um in 1 li High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (21): /* Particles>1.0um in 1 li Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (22): /* Particles>2.5um in 1 li High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (23): /* Particles>2.5um in 1 li Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (24): /* Particles>5.0um in 1 li High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (25): /* Particles>5.0um in 1 li Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (26): /* Particles>10.0um in 1 li High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (27): /* Particles>10.0um in 1 li Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (28): /* Reserved High:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (29): /* Reserved Low:*/  pms5003CalcChecksum += pms5003Value; break;
+	case (30): /* Check High:*/  pms5003RecChecksum = pms5003Value; break;
+	case (31): /* Check Low:*/  
+		pms5003RecChecksum = (pms5003RecChecksum <<8) + pms5003Value; break;
+	}
+
+	pms5003Len++;
+
+	if (pms5003Len == 32)
+	{
+		pms5003Len = 0;
+
+		if (pms5003RecChecksum == pms5003CalcChecksum & 0xFFFF)
+		{
+			//Serial.print("PM10: ");
+			//Serial.println(pms5003Pm10Serial);
+			//Serial.print("PM25: ");
+			//Serial.println(pms5003Pm25Serial);
+
+			result->pm10 = pms5003Pm10Serial;
+			result->pm25 = pms5003Pm25Serial;
+
+			result->lastAirqreadingMillis = millis();
+
+			updateAverages(result);
+			return true;
+		}
+		//else
+		//{
+		//	Serial.print("BDCHK:");
+		//	Serial.print(' ');
+		//	Serial.print(pms5003CalcChecksum);
+		//	Serial.print(' ');
+		//	Serial.print(pms5003RecChecksum);
+		//	Serial.print(' ');
+		//	Serial.println(pms5003RecChecksum - pms5003CalcChecksum);
+		//}
+	}
+	return false;
+}
+
+
 
 
 int updateAirqReading(struct sensor * airqSensor)
@@ -306,6 +396,9 @@ int updateAirqReading(struct sensor * airqSensor)
 				case ZPH01_SENSOR:
 					gotReading = pumpZPH01Byte(airqualityActiveReading, (byte) ch);
 					break;
+				case PMS5003_SENSOR:
+					gotReading = pumppms5003Byte(airqualityActiveReading, (byte)ch);
+					break;
 				}
 
 				if (gotReading)
@@ -336,13 +429,14 @@ int addAirqReading(struct sensor * airqSensor, char * jsonBuffer, int jsonBuffer
 
 		switch (settings.airqSensorType)
 		{
-		case 1: // sds011
+		case SDS011_SENSOR:
+		case PMS5003_SENSOR: 
 			snprintf(jsonBuffer, jsonBufferSize, "%s,\"PM10\":%.2f,\"PM25\":%.2f",
 				jsonBuffer,
 				airqualityActiveReading->pm10, airqualityActiveReading->pm25);
 			return SENSOR_OK;
 
-		case 2: // ZPH01
+		case ZPH01_SENSOR:
 			snprintf(jsonBuffer, jsonBufferSize, "%s,\"PM25\":%.2f",
 				jsonBuffer,
 				airqualityActiveReading->pm25);
@@ -366,6 +460,10 @@ void airqStatusMessage(struct sensor * airqSensor, char * buffer, int bufferLeng
 
 	case SDS011_SENSOR:
 		snprintf(buffer, bufferLength, "SDS011 sensor ");
+		break;
+
+	case PMS5003_SENSOR:
+		snprintf(buffer, bufferLength, "PMS 5003 sensor ");
 		break;
 
 	default:

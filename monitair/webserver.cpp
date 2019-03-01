@@ -5,13 +5,14 @@
 
 #include "webserver.h"
 
-#define WEB_PAGE_BUFFER_SIZE 5000
+#define WEB_PAGE_BUFFER_SIZE 2000
 
 #define WEBSERVER_OK 0
 #define WEBSERVER_OFF 1
 #define WEBSERVER_ERROR_NO_WIFI -1
 
-char webPageBuffer[WEB_PAGE_BUFFER_SIZE];
+char webPageBuffer [WEB_PAGE_BUFFER_SIZE];
+
 
 const char homePageHeader[] =
 "<html>"

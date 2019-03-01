@@ -7,9 +7,12 @@ char * dayNames[] = { "", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
 char * monthNames[] = { "", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
+Timezone homeTimezone;
 
 int startClock(struct sensor * clockSensor)
 {
+	homeTimezone.setLocation();
+
 	if (clockWiFiProcess == NULL)
 	{
 		clockWiFiProcess = findProcessByName("WiFi");
@@ -98,15 +101,19 @@ int addClockReading(struct sensor * clockSensor, char * jsonBuffer, int jsonBuff
 		clockActiveReading =
 			(struct clockReading *) clockSensor->activeReading;
 
-		snprintf(jsonBuffer, jsonBufferSize, "%s,\"timestamp\":\"%s %s %d %d %02d:%02d:%02d GMT+0000\"",
+		//snprintf(jsonBuffer, jsonBufferSize, "%s,\"timestamp\":\"%s %s %d %d %02d:%02d:%02d GMT+0000\"",
+		//	jsonBuffer,
+		//	dayNames[clockActiveReading->dayOfWeek],
+		//	monthNames[clockActiveReading->month],
+		//	clockActiveReading->day,
+		//	clockActiveReading->year,
+		//	clockActiveReading->hour,
+		//	clockActiveReading->minute,
+		//	clockActiveReading->second);
+
+		snprintf(jsonBuffer, jsonBufferSize, "%s,\"timestamp\":\"%lu\"",
 			jsonBuffer,
-			dayNames[clockActiveReading->dayOfWeek],
-			monthNames[clockActiveReading->month],
-			clockActiveReading->day,
-			clockActiveReading->year,
-			clockActiveReading->hour,
-			clockActiveReading->minute,
-			clockActiveReading->second);
+			homeTimezone.now());
 	}
 
 	return clockSensor->status;

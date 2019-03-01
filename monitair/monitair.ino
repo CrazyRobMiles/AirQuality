@@ -1,12 +1,13 @@
+#include <NeoPixelBus.h>
+#include <NeoPixelBrightnessBus.h>
+#include <NeoPixelAnimator.h>
 #include <MicroNMEA.h>
 #include <DNSServer.h>
-#include <Adafruit_NeoPixel.h>
 #include <ezTime.h>
 #include <PubSubClient.h>
 #include "SoftwareSerial.h"
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
-#include <ESP8266WebServerSecureBearSSL.h>
 #include <ESP8266WebServerSecureAxTLS.h>
 #include <ESP8266WebServerSecure.h>
 #include <ESP8266WebServer.h>
@@ -63,7 +64,13 @@ void setup() {
 
 void loop() 
 {
+	//struct sensor * airq = findSensorByName("Air quality");
+
+	//updateAirqReading(airq);
+	//delay(1);
+	//return;
 	updateProcesses();
 	updateSensors();
 	sendSensorReadings();
+	delay(1);
 }

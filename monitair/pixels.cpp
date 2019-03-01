@@ -1,11 +1,14 @@
 #include <Arduino.h>
-#include <Adafruit_NeoPixel.h>
+#include <NeoPixelBus.h>
+#include <NeoPixelBrightnessBus.h>
+#include <NeoPixelAnimator.h>
 
 #include "pixels.h"
 #include "settings.h"
 #include "airquality.h"
 
-Adafruit_NeoPixel * strip = NULL;
+
+NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart800KbpsMethod> * strip;
 
 // All the brightness values are between 0 and 1
 // Scale them for the particular display
@@ -196,20 +199,18 @@ void renderVirtualPixel(VirtualPixel * lamp)
 	byte g = (byte)(lamp->factors[GREEN_FACTOR].factor_value * brightness * low_factor);
 	byte b = (byte)(lamp->factors[BLUE_FACTOR].factor_value * brightness * low_factor);
 
-	add_color_to_pixel(pos, strip->gamma8(r), strip->gamma8(g), strip->gamma8(b));
+	add_color_to_pixel(pos, r, g, b);
 
 	r = (byte)(lamp->factors[RED_FACTOR].factor_value * brightness * diff);
 	g = (byte)(lamp->factors[GREEN_FACTOR].factor_value * brightness * diff);
 	b = (byte)(lamp->factors[BLUE_FACTOR].factor_value * brightness * diff);
 
-	add_color_to_pixel((pos + 1) % settings.noOfPixels, strip->gamma8(r), strip->gamma8(g), strip->gamma8(b));
+	add_color_to_pixel((pos + 1) % settings.noOfPixels, r, g, b);
 
 }
 
 void renderVirtualPixels(struct VirtualPixel * lamps)
 {
-	strip->clear();
-
 	clear_pixels();
 
 	for (int i = 0; i < NO_OF_VIRTUAL_PIXELS; i++)
@@ -219,10 +220,10 @@ void renderVirtualPixels(struct VirtualPixel * lamps)
 
 	for (int i = 0; i < settings.noOfPixels; i++)
 	{
-		strip->setPixelColor(i, pixels[i].r, pixels[i].g, pixels[i].b);
+		strip->SetPixelColor(i, { pixels[i].r,pixels[i].g,pixels[i].b });
 	}
 
-	strip->show();
+	strip->Show();
 }
 
 
@@ -496,11 +497,10 @@ void startPixelStrip()
 	if (strip != NULL)
 		return;
 
-	strip = new Adafruit_NeoPixel(settings.noOfPixels,
-		settings.pixelControlPinNo, NEO_GRB + NEO_KHZ800);
-
-	strip->begin();
-	strip->show(); // Initialize all pixels to 'off'
+	strip = new NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart800KbpsMethod> (12, settings.pixelControlPinNo);
+	strip->Begin();
+	strip->SetPixelColor(0, { 255,0,0 });
+	strip->Show();
 }
 
 // status display doesn't use the animated leds
@@ -516,10 +516,10 @@ void initialiseStatusDisplay(byte r, byte g, byte b)
 
 	for (int i = 0; i < settings.noOfPixels; i++)
 	{
-		// turn off all the pixels
-		strip->setPixelColor(i, r, g, b);
+		strip->SetPixelColor(i, { r,g,b });
 	}
 }
+
 
 boolean setStatusDisplayPixel(int pixelNumber, boolean statusOK)
 {
@@ -527,9 +527,13 @@ boolean setStatusDisplayPixel(int pixelNumber, boolean statusOK)
 		return false;
 
 	if (statusOK)
-		strip->setPixelColor(pixelNumber, 0, 255, 0);
+	{
+		strip->SetPixelColor(pixelNumber, { 0,255,0 });
+	}
 	else
-		strip->setPixelColor(pixelNumber, 255, 0, 0);
+	{
+		strip->SetPixelColor(pixelNumber, { 255,0,0 });
+	}
 
 	return true;
 }
@@ -547,7 +551,7 @@ void beginWifiStatusDisplay()
 
 void renderStatusDisplay()
 {
-	strip->show();
+	strip->Show();
 }
 
 boolean addStatusItem(boolean status)

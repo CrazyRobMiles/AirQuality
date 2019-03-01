@@ -73,8 +73,6 @@ int startMQTT(struct process * mqttProcess)
 		return MQTT_ERROR_NO_WIFI;
 	}
 
-	Serial.println("Restarting MQTT");
-
 	if (espClient == NULL)
 	{
 		if (settings.mqttSecureSockets)
@@ -127,16 +125,16 @@ int startMQTT(struct process * mqttProcess)
 
 	mqttPubSubClient->subscribe(settings.mqttSubscribeTopic);
 
-	snprintf(mqtt_send_buffer, MQTT_SEND_BUFFER_SIZE,
-		"{\"dev\":\"%s\", \"status\":\"starting\"}",
-		settings.deviceName);
+	//snprintf(mqtt_send_buffer, MQTT_SEND_BUFFER_SIZE,
+	//	"{\"dev\":\"%s\", \"status\":\"starting\"}",
+	//	settings.deviceName);
 
-	if (!mqttPubSubClient->publish(settings.mqttReportTopic, mqtt_send_buffer))
-	{
-		Serial.println("publish failed");
-		mqttProcess->status = MQTT_ERROR_CONNECT_MESSAGE_FAILED;
-		return MQTT_ERROR_CONNECT_MESSAGE_FAILED;
-	}
+	//if (!mqttPubSubClient->publish(settings.mqttReportTopic, mqtt_send_buffer))
+	//{
+	//	Serial.println("publish failed");
+	//	mqttProcess->status = MQTT_ERROR_CONNECT_MESSAGE_FAILED;
+	//	return MQTT_ERROR_CONNECT_MESSAGE_FAILED;
+	//}
 
 	mqttProcess->status = MQTT_OK;
 	return MQTT_OK;

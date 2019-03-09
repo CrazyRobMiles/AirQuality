@@ -1,6 +1,5 @@
-#include <NeoPixelBus.h>
-#include <NeoPixelBrightnessBus.h>
-#include <NeoPixelAnimator.h>
+#include <Arduino.h>
+
 #include <MicroNMEA.h>
 #include <DNSServer.h>
 #include <ezTime.h>
@@ -8,16 +7,9 @@
 #include "SoftwareSerial.h"
 #include <Adafruit_BME280.h>
 #include <Adafruit_Sensor.h>
-#include <ESP8266WebServerSecureAxTLS.h>
-#include <ESP8266WebServerSecure.h>
 #include <ESP8266WebServer.h>
 #include <WiFiUdp.h>
-#include <WiFiServerSecureBearSSL.h>
-#include <WiFiServerSecureAxTLS.h>
-#include <WiFiServerSecure.h>
 #include <WiFiServer.h>
-#include <WiFiClientSecureBearSSL.h>
-#include <WiFiClientSecureAxTLS.h>
 #include <WiFiClientSecure.h>
 #include <WiFiClient.h>
 #include <ESP8266WiFiType.h>
@@ -27,10 +19,7 @@
 #include <ESP8266WiFiGeneric.h>
 #include <ESP8266WiFiAP.h>
 #include <ESP8266WiFi.h>
-#include <CertStoreBearSSL.h>
-#include <BearSSLHelpers.h>
 #include <EEPROM.h>
-#include <Arduino.h>
 
 #include "utils.h"
 #include "settings.h"

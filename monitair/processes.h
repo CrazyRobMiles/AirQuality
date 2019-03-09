@@ -26,9 +26,6 @@ void updateWifiConfigProcesses();
 void dumpProcessStatus();
 void updateProcess(struct process * process);
 void updateProcesses();
-void updateSerialCompatibleProcesses();
-void activeDelay(long delayTime);
-void activeSerialCompatibleDelay(long delayTime);
 void displayProcessStatus();
 
 

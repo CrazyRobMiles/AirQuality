@@ -138,7 +138,12 @@ int startMQTT(struct process * mqttProcess)
 boolean publishReadingsToMQTT(char * buffer)
 {
 	if (activeMQTTProcess->status == MQTT_OK)
+	{
+		Serial.println("Publishing message");
 		return mqttPubSubClient->publish(settings.mqttPublishTopic, buffer);
+	}
+
+	Serial.println("Not publishing message");
 
 	return false;
 }
@@ -153,22 +158,57 @@ unsigned long timeOfLastMQTTsuccess = 0;
 
 int updateMQTT(struct process * mqttProcess)
 {
-	if (mqttProcess->status == MQTT_OK)
+	if (mqttWiFiProcess->status != WIFI_OK)
 	{
+		mqttProcess->status = MQTT_ERROR_NO_WIFI;
+		return MQTT_ERROR_NO_WIFI;
+	}
+
+	switch (mqttProcess->status)
+	{
+
+	case MQTT_OK:
+
 		timeOfLastMQTTsuccess = millis();
+
 		if (!mqttPubSubClient->loop())
 		{
+			mqttPubSubClient->disconnect();
 			mqttProcess->status = MQTT_ERROR_LOOP_FAILED;
 		}
-	}
-	else
-	{
+
+		break;
+
+	case MQTT_OFF:
+		break;
+
+	case MQTT_ERROR_NO_WIFI:
+		if (mqttWiFiProcess->status == WIFI_OK)
+		{
+			mqttProcess->status = startMQTT(mqttProcess);
+		}
+		break;
+
+	case MQTT_ERROR_BAD_PROTOCOL:
+	case MQTT_ERROR_BAD_CLIENT_ID:
+	case MQTT_ERROR_CONNECT_UNAVAILABLE:
+	case MQTT_ERROR_BAD_CREDENTIALS:
+	case MQTT_ERROR_CONNECT_UNAUTHORIZED:
+	case MQTT_ERROR_CONNECT_FAILED:
+	case MQTT_ERROR_CONNECT_ERROR:
+	case MQTT_ERROR_CONNECT_MESSAGE_FAILED:
+	case MQTT_ERROR_LOOP_FAILED:
 		if (ulongDiff(millis(), timeOfLastMQTTsuccess) > MQTT_CONNECT_RETRY_INTERVAL_MSECS)
 		{
 			mqttProcess->status = startMQTT(mqttProcess);
 			timeOfLastMQTTsuccess = millis();
 		}
+		break;
+
+	default:
+		break;
 	}
+
 	return mqttProcess->status;
 }
 

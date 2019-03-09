@@ -66,27 +66,46 @@ void getClockReadings(struct sensor * clockSensor)
 
 int updateClockReading(struct sensor * clockSensor)
 {
-	events();
-
-	switch (timeStatus())
+	switch (clockSensor->status)
 	{
-	case timeNotSet:
-		clockSensor->status = CLOCK_ERROR_TIME_NOT_SET;
+	case SENSOR_OK:
 		break;
-	case timeSet:
-		getClockReadings(clockSensor);
-		clockSensor->millisAtLastReading = millis();
-		clockSensor->status = SENSOR_OK;
-		break;
-	case timeNeedsSync:
-		if (waitForSync(CLOCK_SYNC_TIMEOUT)) {
-			getClockReadings(clockSensor);
+
+	case CLOCK_ERROR_NO_WIFI:
+		if (clockWiFiProcess->status == WIFI_OK)
+		{
 			clockSensor->status = SENSOR_OK;
 		}
-		else
+		break;
+
+	case CLOCK_ERROR_TIME_NOT_SET:
+	case CLOCK_ERROR_NEEDS_SYNC:
+
+		events();
+
+		switch (timeStatus())
 		{
-			clockSensor->status = CLOCK_ERROR_NEEDS_SYNC;
+		case timeNotSet:
+			clockSensor->status = CLOCK_ERROR_TIME_NOT_SET;
+			break;
+		case timeSet:
+			getClockReadings(clockSensor);
+			clockSensor->millisAtLastReading = millis();
+			clockSensor->status = SENSOR_OK;
+			break;
+		case timeNeedsSync:
+			if (waitForSync(CLOCK_SYNC_TIMEOUT)) {
+				getClockReadings(clockSensor);
+				clockSensor->status = SENSOR_OK;
+			}
+			else
+			{
+				clockSensor->status = CLOCK_ERROR_NEEDS_SYNC;
+			}
+			break;
 		}
+		break;
+	default:
 		break;
 	}
 
@@ -111,9 +130,9 @@ int addClockReading(struct sensor * clockSensor, char * jsonBuffer, int jsonBuff
 		//	clockActiveReading->minute,
 		//	clockActiveReading->second);
 
-		snprintf(jsonBuffer, jsonBufferSize, "%s,\"timestamp\":\"%lu\"",
+		snprintf(jsonBuffer, jsonBufferSize, "%s,\"timestamp\":\"%s\"",
 			jsonBuffer,
-			homeTimezone.now());
+			UTC.dateTime(RFC3339).c_str());
 	}
 
 	return clockSensor->status;

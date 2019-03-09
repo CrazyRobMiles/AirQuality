@@ -11,7 +11,6 @@
 
 char webPageBuffer [WEB_PAGE_BUFFER_SIZE];
 
-
 const char homePageHeader[] =
 "<html>"
 "<head>"

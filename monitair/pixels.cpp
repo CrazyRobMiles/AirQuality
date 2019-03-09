@@ -497,7 +497,7 @@ void startPixelStrip()
 	if (strip != NULL)
 		return;
 
-	strip = new NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart800KbpsMethod> (12, settings.pixelControlPinNo);
+	strip = new NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart800KbpsMethod> (settings.noOfPixels, settings.pixelControlPinNo);
 	strip->Begin();
 	strip->SetPixelColor(0, { 255,0,0 });
 	strip->Show();

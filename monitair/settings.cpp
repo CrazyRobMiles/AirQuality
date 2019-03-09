@@ -99,7 +99,7 @@ boolean validateDouble(void * dest, const char * newValueStr)
 void setDefaultDevname(void * dest)
 {
 	char * destStr = (char *)dest;
-	snprintf(destStr, DEVICE_NAME_LENGTH, "Monitair-%06x", ESP.getChipId());
+	snprintf(destStr, DEVICE_NAME_LENGTH, "CHASW-%06x-1", ESP.getChipId());
 }
 
 

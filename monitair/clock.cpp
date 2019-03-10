@@ -68,9 +68,6 @@ int updateClockReading(struct sensor * clockSensor)
 {
 	switch (clockSensor->status)
 	{
-	case SENSOR_OK:
-		break;
-
 	case CLOCK_ERROR_NO_WIFI:
 		if (clockWiFiProcess->status == WIFI_OK)
 		{
@@ -78,6 +75,7 @@ int updateClockReading(struct sensor * clockSensor)
 		}
 		break;
 
+	case SENSOR_OK:
 	case CLOCK_ERROR_TIME_NOT_SET:
 	case CLOCK_ERROR_NEEDS_SYNC:
 

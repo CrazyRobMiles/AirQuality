@@ -3,7 +3,7 @@
 
 #include "webserver.h"
 
-#define WEB_PAGE_BUFFER_SIZE 2000
+#define WEB_PAGE_BUFFER_SIZE 1000
 
 #define WEBSERVER_OK 0
 #define WEBSERVER_OFF 1

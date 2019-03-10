@@ -119,6 +119,9 @@ int startAirq(struct sensor * airqSensor)
 			(struct airqualityReading *) airqSensor->activeReading;
 	}
 
+	airqualityActiveReading->errors = 0;
+	airqualityActiveReading->readings = 0;
+
 	// Open the serial port
 	if (airqSensorSerial == NULL)
 	{
@@ -183,28 +186,17 @@ boolean pumpSDS011Byte(airqualityReading * result, byte sds011Value)
 			float pm10 = sds011Pm10Serial / 10.0;
 			float pm25 = sds011PM25Serial / 10.0;
 
-			//Serial.print("PM10:");
-			//Serial.println(pm10);
-			//Serial.print("PM25:");
-			//Serial.println(pm25);
-
 			result->pm10 = pm10;
 			result->pm25 = pm25;
 
-			result->lastAirqreadingMillis = millis();
+			result->readings++;
 
 			updateAverages(result);
 			return true;
 		}
 		else
 		{
-			Serial.print("BDCHK:");
-			Serial.print(' ');
-			Serial.print(sds011CalcChecksum);
-			Serial.print(' ');
-			Serial.print(sds011RecChecksum);
-			Serial.print(' ');
-			Serial.println(sds011RecChecksum - sds011CalcChecksum);
+			result->errors++;
 		}
 	}
 
@@ -246,20 +238,16 @@ boolean pumpZPH01Byte(airqualityReading * result, byte zph01Value)
 
 			result->pm25 = pm25;
 			result->pm10 = -1;
-			result->lastAirqreadingMillis = millis();
 
 			updateAverages(result);
+
+			result->readings++;
 
 			gotResult = true;
 		}
 		else
 		{
-			Serial.print("BDCHK:");
-			Serial.print(zph01Value);
-			Serial.print(' ');
-			Serial.print(zph01CalcChecksum);
-			Serial.print(' ');
-			Serial.println(zph01Value - zph01CalcChecksum);
+			result->errors++;
 		}
 		zph01Len = 0;
 	}
@@ -321,29 +309,16 @@ boolean pumppms5003Byte(airqualityReading * result, byte pms5003Value)
 
 		if (pms5003RecChecksum == pms5003CalcChecksum & 0xFFFF)
 		{
-			//Serial.print("PM10: ");
-			//Serial.println(pms5003Pm10Serial);
-			//Serial.print("PM25: ");
-			//Serial.println(pms5003Pm25Serial);
-
 			result->pm10 = pms5003Pm10Serial;
 			result->pm25 = pms5003Pm25Serial;
-
-			result->lastAirqreadingMillis = millis();
-
+			result->readings++;
 			updateAverages(result);
 			return true;
 		}
-		//else
-		//{
-		//	Serial.print("BDCHK:");
-		//	Serial.print(' ');
-		//	Serial.print(pms5003CalcChecksum);
-		//	Serial.print(' ');
-		//	Serial.print(pms5003RecChecksum);
-		//	Serial.print(' ');
-		//	Serial.println(pms5003RecChecksum - pms5003CalcChecksum);
-		//}
+		else
+		{
+			result->errors++;
+		}
 	}
 	return false;
 }
@@ -402,8 +377,10 @@ int updateAirqReading(struct sensor * airqSensor)
 				}
 
 				if (gotReading)
+				{
 					airqSensor->status = SENSOR_OK;
-
+					airqSensor->millisAtLastReading = millis();
+				}
 				break;
 
 			case AIRQ_NO_SENSOR_DETECTED_AT_START:
@@ -422,7 +399,7 @@ int addAirqReading(struct sensor * airqSensor, char * jsonBuffer, int jsonBuffer
 	struct airqualityReading * airqualityActiveReading =
 		(airqualityReading *)airqSensor->activeReading;
 
-	if (ulongDiff(millis(), airqualityActiveReading->lastAirqreadingMillis) < AIRQ_READING_LIFETIME_MSECS)
+	if (ulongDiff(millis(), airqSensor->millisAtLastReading) < AIRQ_READING_LIFETIME_MSECS)
 	{
 		struct airqualityReading * airqualityActiveReading =
 			(airqualityReading *)airqSensor->activeReading;
@@ -471,6 +448,11 @@ void airqStatusMessage(struct sensor * airqSensor, char * buffer, int bufferLeng
 		break;
 
 	}
+
+	snprintf(buffer, bufferLength, "%s Readings:%d Errors:%d ",
+		buffer,
+		airqualityActiveReading->readings,
+		airqualityActiveReading->errors);
 
 	switch (airqSensor->status)
 	{

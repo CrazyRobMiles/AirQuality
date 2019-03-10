@@ -13,7 +13,6 @@
 #define AIRQ_AVERAGE_LIFETIME_MSECS 10000
 
 struct airqualityReading {
-	unsigned long lastAirqreadingMillis;
 	float pm25;
 	float pm10;
 	unsigned long lastAirqAverageMillis;
@@ -23,6 +22,8 @@ struct airqualityReading {
 	float pm25AvgTotal;
 	float pm10AvgTotal;
 	int averageCount;
+	int readings;
+	int errors;
 };
 
 int startAirq(struct sensor * airqSensor);

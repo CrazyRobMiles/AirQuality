@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include <DNSServer.h>
 #include <WiFiUdp.h>
+#include <WiFiServerSecureBearSSL.h>
+#include <WiFiServerSecureAxTLS.h>
+#include <WiFiServerSecure.h>
 #include <WiFiServer.h>
-#include <WiFiClientSecure.h>
 #include <WiFiClient.h>
 #include <ESP8266WiFiType.h>
 #include <ESP8266WiFiSTA.h>

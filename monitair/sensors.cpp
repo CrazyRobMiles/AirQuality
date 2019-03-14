@@ -78,7 +78,8 @@ void updateSensors()
 	{
 		if (sensorList[i]->beingUpdated)
 		{
-			//Serial.printf("Updating %s\n", sensorList[i]->sensorName);
+			//Serial.print(sensorList[i]->sensorName);
+			//Serial.print(' ');
 			unsigned long startMicros = micros();
 			sensorList[i]->updateSensor(sensorList[i]);
 			sensorList[i]->activeTime = ulongDiff(micros(), startMicros);

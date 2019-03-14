@@ -134,6 +134,8 @@ void updateProcesses()
 	{
 		if (runningProcessList[i]->beingUpdated)
 		{
+			//Serial.print(runningProcessList[i]->processName);
+			//Serial.print(' ');
 			updateProcess(runningProcessList[i]);
 		}
 	}

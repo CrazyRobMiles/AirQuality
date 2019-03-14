@@ -36,7 +36,6 @@ int startClock(struct sensor * clockSensor)
 		clockSensor->status = CLOCK_ERROR_NO_WIFI;
 		return CLOCK_ERROR_NO_WIFI;
 	}
-
 	events();
 
 	if (waitForSync(CLOCK_SYNC_TIMEOUT)) {

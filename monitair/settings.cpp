@@ -354,7 +354,7 @@ void setDefaultGpsPinNo(void * dest)
 void setDefaultPowerControlPinNo(void * dest)
 {
 	int * destInt = (int *)dest;
-	*destInt = 2;
+	*destInt = 5;
 }
 
 void setDefaultControlInputPin(void * dest)

@@ -298,7 +298,8 @@ void setupWalkingColour(ColourValue colour)
 {
 	byte color_pos;
 	float start_speed = 0.5;
-	float speed_update = 0.125;
+//	float speed_update = 0.125;
+	float speed_update = 0.5;
 
 	float degreesPerPixel = 360 / settings.noOfPixels;
 
@@ -308,7 +309,7 @@ void setupWalkingColour(ColourValue colour)
 	for (int i = 0; i < 8; i++)
 	{
 		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, i*degreesPerPixel, 0, 1.0);
-		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, i, 0, 359, start_speed, do_update_loop);
+		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, i, 0, 359, start_speed, do_update_larsen);
 		start_speed += speed_update;
 	}
 }
@@ -496,7 +497,8 @@ void startPixelStrip()
 	if (strip != NULL)
 		return;
 
-	strip = new NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart1800KbpsMethod> (12, settings.pixelControlPinNo);
+	strip = new NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart1800KbpsMethod> (
+		settings.noOfPixels, settings.pixelControlPinNo);
 	strip->Begin();
 	strip->SetPixelColor(0, { 255,0,0 });
 	strip->Show();

@@ -9,7 +9,7 @@
 
 #define NO_OF_VIRTUAL_PIXELS 12
 
-#define MAX_NO_OF_PIXELS 12
+#define MAX_NO_OF_PIXELS 20
 
 #define MILLIS_BETWEEN_UPDATES 20
 

@@ -50,6 +50,13 @@ void onDisconnect(const WiFiEventStationModeDisconnected& event) {
 
 int startWifi(struct process * wifiProcess)
 {
+	if (!settings.wiFiOn)
+	{
+		Serial.println("WiFi switched off");
+		wifiProcess->status = WIFI_TURNED_OFF;
+		return WIFI_TURNED_OFF;
+	}
+
 	wifiStatusAddress = &wifiProcess->status;
 
 	lastWiFiConnectAtteptMillis = millis();
@@ -134,6 +141,9 @@ int stopWiFi(struct process * wifiProcess)
 
 int updateWifi(struct process * wifiProcess)
 {
+	if (!settings.wiFiOn)
+		return WIFI_OFF;
+
 	if (wifiProcess->status == WIFI_OK)
 	{
 		int wifiStatusValue = WiFi.status();

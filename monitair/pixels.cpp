@@ -298,8 +298,8 @@ void setupWalkingColour(ColourValue colour)
 {
 	byte color_pos;
 	float start_speed = 0.5;
-//	float speed_update = 0.125;
-	float speed_update = 0.5;
+	float speed_update = 0.125;
+//	float speed_update = 0.5;
 
 	float degreesPerPixel = 360 / settings.noOfPixels;
 

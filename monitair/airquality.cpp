@@ -125,7 +125,7 @@ int startAirq(struct sensor * airqSensor)
 	// Open the serial port
 	if (airqSensorSerial == NULL)
 	{
-		airqSensorSerial = new  SoftwareSerial(settings.airqRXPinNo, -1, false, 128);
+		airqSensorSerial = new  SoftwareSerial(settings.airqRXPinNo, -1, false, 128, true);
 		airqSensorSerial->begin(9600);
 	}
 

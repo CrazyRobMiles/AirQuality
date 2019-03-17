@@ -17,6 +17,7 @@ SoftwareSerial * gpsSerial = NULL;
 unsigned long gpsReadingStartTime;
 
 unsigned long lastGPSserialDataReceived;
+int gpsCharCount = 0;
 
 void printUnknownSentence(const MicroNMEA& nmea)
 {
@@ -27,6 +28,7 @@ void printUnknownSentence(const MicroNMEA& nmea)
 
 int startGps(struct sensor * gpsSensor)
 {
+	gpsCharCount = 0;
 	struct gpsReading * activeGPSReading ;
 
 	if (gpsSensor->activeReading == NULL)
@@ -43,7 +45,7 @@ int startGps(struct sensor * gpsSensor)
 	// Open the serial port
 	if (gpsSerial == NULL)
 	{
-		gpsSerial = new  SoftwareSerial(settings.gpsRXPinNo, -1, false, 128);
+		gpsSerial = new  SoftwareSerial(settings.gpsRXPinNo, -1, false, 128,true);
 		gpsSerial->begin(9600);
 	}
 
@@ -89,6 +91,8 @@ int updateGpsReading(struct sensor * gpsSensor)
 
 	while (gpsSerial->available())
 	{
+		gpsCharCount++;
+
 		char ch = gpsSerial->read();
 		
 		nmea.process(ch);
@@ -148,7 +152,7 @@ void gpsStatusMessage(struct sensor * gpsSensor, char * buffer, int bufferLength
 		snprintf(buffer, bufferLength, "GPS sensor no data received");
 		break;
 	case GPS_ERROR_NO_FIX:
-		snprintf(buffer, bufferLength, "GPS sensor no fix");
+		snprintf(buffer, bufferLength, "GPS sensor no fix chars: %d", gpsCharCount);
 		break;
 	}
 }

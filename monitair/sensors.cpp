@@ -52,6 +52,7 @@ void startSensors()
 		Serial.printf("%s\n", sensorStatusBuffer);
 		startSensor->beingUpdated = true;
 		addStatusItem(startSensor->status == SENSOR_OK);
+		renderStatusDisplay();
 	}
 }
 

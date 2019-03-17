@@ -68,11 +68,12 @@ static void(*ISRList[MAX_PIN + 1])() = {
 	  sws_isr_15
 };
 
-SoftwareSerial::SoftwareSerial(int receivePin, int transmitPin, bool inverse_logic, unsigned int buffSize) {
+SoftwareSerial::SoftwareSerial(int receivePin, int transmitPin, bool inverse_logic, unsigned int buffSize, bool edge_triggered) {
 	m_oneWire = (receivePin == transmitPin);
 	m_rxValid = m_txValid = m_txEnableValid = false;
 	m_buffer = NULL;
 	m_invert = inverse_logic;
+	m_edge = edge_triggered;
 	m_overflow = false;
 	m_rxEnabled = false;
 	if (isValidGPIOpin(receivePin)) {
@@ -158,8 +159,12 @@ void SoftwareSerial::enableTx(bool on) {
 
 void SoftwareSerial::enableRx(bool on) {
 	if (m_rxValid) {
-		if (on)
-			attachInterrupt(m_rxPin, ISRList[m_rxPin], CHANGE); // fire at rising and falling edges
+		if (on) {
+			if (m_edge)
+				attachInterrupt(m_rxPin, ISRList[m_rxPin], CHANGE); // fire at rising and falling edges
+			else
+				attachInterrupt(m_rxPin, ISRList[m_rxPin], m_invert ? RISING : FALLING);
+		}
 		else
 			detachInterrupt(m_rxPin);
 		m_rxEnabled = on;
@@ -225,10 +230,10 @@ int SoftwareSerial::peek() {
 	return m_buffer[m_outPos];
 }
 
-bool SoftwareSerial::propgateBits(bool level, int pulseBitLength)
+inline bool SoftwareSerial::propgateBits(bool level, int pulseBitLength)
 {
-	for(int i=0; i<pulseBitLength; i++)
-	{ 
+	for (int i = 0; i < pulseBitLength; i++)
+	{
 		m_rec >>= 1;
 		if (level)
 			m_rec |= 0x80;
@@ -242,7 +247,7 @@ bool SoftwareSerial::propgateBits(bool level, int pulseBitLength)
 	return false;
 }
 
-void SoftwareSerial::setWaitingForStart()
+inline void SoftwareSerial::setWaitingForStart()
 {
 	m_getByteState = awaitingStart;
 }
@@ -263,96 +268,51 @@ void ICACHE_RAM_ATTR SoftwareSerial::rxRead() {
 	// initial delay which occurs before the interrupt is delivered
 	unsigned long wait = m_bitTime + m_bitTime / 3 - 500;
 	unsigned long start = ESP.getCycleCount();
+	if (m_edge) {
 
-	// Get the rxLevel and convert for inverted input
-	bool rxLevel;
+		// Get the rxLevel and convert for inverted input
+		bool rxLevel;
 
-	if (m_invert)
-		rxLevel = !digitalRead(m_rxPin);
-	else
-		rxLevel = digitalRead(m_rxPin);
-
-	unsigned long byteTime ;
-	float byteBitLengthFloat;
-	int byteBitLength;
-
-	unsigned long pulseTime ;
-	float pulseBitLengthFloat;
-	int pulseBitLength;
-
-	bool previousBit = !rxLevel;
-	bool gotByte = false;
-
-	switch (m_getByteState)
-	{
-
-	case awaitingStart:
-		if (!rxLevel)
-		{
-			setStartBit(start);
-		}
-		break;
-
-	case gotStart:
-
-		byteTime = start - m_byteStart;
-		byteBitLengthFloat = (float)byteTime / m_bitTime;
-		byteBitLength = (int)(byteBitLengthFloat + 0.5);
-
-		pulseTime = start - m_pulseStart;
-		pulseBitLengthFloat = (float)pulseTime / m_bitTime;
-		pulseBitLength = (int)(pulseBitLengthFloat + 0.5);
-
-		// don't want to add the start bit into the value
-		if (propgateBits(previousBit, pulseBitLength - 1))
-		{
-			// store byte in buffer
-			int next = (m_inPos + 1) % m_buffSize;
-			if (next != m_outPos) {
-				m_buffer[m_inPos] = m_rec;
-				m_inPos = next;
-			}
-			else {
-				m_overflow = true;
-			}
-			setWaitingForStart();
-			return;
-		}
-		m_pulseStart = start;
-		m_getByteState = readingBits;
-		break;
-
-	case readingBits:
-
-		byteTime = start - m_byteStart;
-		byteBitLengthFloat = (float)byteTime / m_bitTime;
-		byteBitLength = (int)(byteBitLengthFloat + 0.5);
-		pulseTime = start - m_pulseStart;
-		pulseBitLengthFloat = (float)pulseTime / m_bitTime;
-		pulseBitLength = (int)(pulseBitLengthFloat + 0.5);
-
-		if (byteBitLength > 9)
-		{
-			// fill in the last bits with high values
-			// because this is the start bit of the next byte
-			propgateBits(true, 8);
-
-			// store the byte in the buffer
-			int next = (m_inPos + 1) % m_buffSize;
-			if (next != m_outPos) {
-				m_buffer[m_inPos] = m_rec;
-				m_inPos = next;
-			}
-			else {
-				m_overflow = true;
-			}
-			setStartBit(start);
-		}
+		if (m_invert)
+			rxLevel = !digitalRead(m_rxPin);
 		else
+			rxLevel = digitalRead(m_rxPin);
+
+		unsigned long byteTime;
+		float byteBitLengthFloat;
+		int byteBitLength;
+
+		unsigned long pulseTime;
+		float pulseBitLengthFloat;
+		int pulseBitLength;
+
+		bool previousBit = !rxLevel;
+		bool gotByte = false;
+
+		switch (m_getByteState)
 		{
-			if (propgateBits(previousBit, pulseBitLength))
+
+		case awaitingStart:
+			if (!rxLevel)
 			{
-				// Store the received value in the buffer unless we have an overflow
+				setStartBit(start);
+			}
+			break;
+
+		case gotStart:
+
+			byteTime = start - m_byteStart;
+			byteBitLengthFloat = (float)byteTime / m_bitTime;
+			byteBitLength = (int)(byteBitLengthFloat + 0.5);
+
+			pulseTime = start - m_pulseStart;
+			pulseBitLengthFloat = (float)pulseTime / m_bitTime;
+			pulseBitLength = (int)(pulseBitLengthFloat + 0.5);
+
+			// don't want to add the start bit into the value
+			if (propgateBits(previousBit, pulseBitLength - 1))
+			{
+				// store byte in buffer
 				int next = (m_inPos + 1) % m_buffSize;
 				if (next != m_outPos) {
 					m_buffer[m_inPos] = m_rec;
@@ -362,10 +322,76 @@ void ICACHE_RAM_ATTR SoftwareSerial::rxRead() {
 					m_overflow = true;
 				}
 				setWaitingForStart();
+				return;
 			}
+			m_pulseStart = start;
+			m_getByteState = readingBits;
+			break;
+
+		case readingBits:
+
+			byteTime = start - m_byteStart;
+			byteBitLengthFloat = (float)byteTime / m_bitTime;
+			byteBitLength = (int)(byteBitLengthFloat + 0.5);
+			pulseTime = start - m_pulseStart;
+			pulseBitLengthFloat = (float)pulseTime / m_bitTime;
+			pulseBitLength = (int)(pulseBitLengthFloat + 0.5);
+
+			if (byteBitLength > 9)
+			{
+				// fill in the last bits with high values
+				// because this is the start bit of the next byte
+				propgateBits(true, 8);
+
+				// store the byte in the buffer
+				int next = (m_inPos + 1) % m_buffSize;
+				if (next != m_outPos) {
+					m_buffer[m_inPos] = m_rec;
+					m_inPos = next;
+				}
+				else {
+					m_overflow = true;
+				}
+				setStartBit(start);
+			}
+			else
+			{
+				if (propgateBits(previousBit, pulseBitLength))
+				{
+					// Store the received value in the buffer unless we have an overflow
+					int next = (m_inPos + 1) % m_buffSize;
+					if (next != m_outPos) {
+						m_buffer[m_inPos] = m_rec;
+						m_inPos = next;
+					}
+					else {
+						m_overflow = true;
+					}
+					setWaitingForStart();
+				}
+			}
+			m_pulseStart = start;
+			break;
 		}
-		m_pulseStart = start;
-		break;
+	}
+	else
+	{
+		uint8_t rec = 0;
+		for (int i = 0; i < 8; i++) {
+			WAIT;
+			rec >>= 1;
+			if (digitalRead(m_rxPin))
+				rec |= 0x80;
+		}
+		if (m_invert) rec = ~rec;
+		// Stop bit
+		WAIT;
+		// Store the received value in the buffer unless we have an overflow
+		int next = (m_inPos + 1) % m_buffSize;
+		if (next != m_inPos) {
+			m_buffer[m_inPos] = rec;
+			m_inPos = next;
+		}
 	}
 
 	// Must clear this bit in the interrupt register,

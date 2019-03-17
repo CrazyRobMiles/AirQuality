@@ -34,7 +34,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 class SoftwareSerial : public Stream {
 public:
-  SoftwareSerial(int receivePin, int transmitPin, bool inverse_logic = false, unsigned int buffSize = 64);
+  SoftwareSerial(int receivePin, int transmitPin, bool inverse_logic = false, unsigned int buffSize = 64, bool edge_triggered = false);
   virtual ~SoftwareSerial();
 
   void begin(long speed);
@@ -78,6 +78,7 @@ private:
   bool isValidGPIOpin(int pin);
 
   // Member variables
+  bool m_edge;
   bool m_oneWire;
   int m_rxPin, m_txPin, m_txEnablePin;
   bool m_rxValid, m_rxEnabled;

@@ -6,7 +6,8 @@
 #include "settings.h"
 #include "airquality.h"
 
-
+// this version of the driver uses GPIO2 for the pixel connection
+// The value of the pixel pin is ignored 
 NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart1800KbpsMethod> * strip;
 
 // All the brightness values are between 0 and 1
@@ -298,18 +299,17 @@ void setupWalkingColour(ColourValue colour)
 {
 	byte color_pos;
 	float start_speed = 0.5;
-	float speed_update = 0.125;
-//	float speed_update = 0.5;
+//	float speed_update = 0.125;    // speed for the desktop sensor
+	float speed_update = 0.5;      // speed for the top hat
 
-	float degreesPerPixel = 360 / settings.noOfPixels;
+	float degreesPerPixel = 360.0 / NO_OF_VIRTUAL_PIXELS;
 
 	clearVirtualPixels(lamps);
 
-	//  for (int i = 0; i < sizeof(pixelsInMessage)/sizeof(int); i++)	
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < NO_OF_VIRTUAL_PIXELS; i++)
 	{
 		setupVirtualPixel(&lamps[i], colour.r, colour.g, colour.b, i*degreesPerPixel, 0, 1.0);
-		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, i, 0, 359, start_speed, do_update_larsen);
+		setupVirtualPixelFactor(&lamps[i], POSITION_FACTOR, i, 0, 359, start_speed, do_update_loop);
 		start_speed += speed_update;
 	}
 }
@@ -496,12 +496,13 @@ void startPixelStrip()
 {
 	if (strip != NULL)
 		return;
-
 	strip = new NeoPixelBus<NeoGrbFeature, NeoEsp8266Uart1800KbpsMethod> (
 		settings.noOfPixels, settings.pixelControlPinNo);
 	strip->Begin();
 	strip->SetPixelColor(0, { 255,0,0 });
+	strip->SetPixelColor(1, { 255,0,255 });
 	strip->Show();
+	delay(500);
 }
 
 // status display doesn't use the animated leds

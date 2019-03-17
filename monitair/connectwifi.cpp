@@ -64,7 +64,7 @@ int startWifi(struct process * wifiProcess)
 	Serial.println("Starting WiFi");
 
 	// stop the device from being an access point when you don't want it 
-	WiFi.onStationModeDisconnected(onDisconnect);
+
 	if (firstRun)
 	{
 		Serial.println("First run");

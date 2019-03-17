@@ -37,6 +37,9 @@ char mqtt_send_buffer[MQTT_SEND_BUFFER_SIZE];
 
 boolean first_mqtt_message = true;
 
+int messagesSent;
+int messagesReceived;
+
 void callback(char* topic, byte* payload, unsigned int length)
 {
 	int i;
@@ -48,6 +51,8 @@ void callback(char* topic, byte* payload, unsigned int length)
 	mqtt_receive_buffer[i] = 0;
 	// Now do something with the string....
 	Serial.printf("Received from MQTT: %s\n", mqtt_receive_buffer);
+
+	messagesReceived++;
 }
 
 int mqttConnectErrorNumber;
@@ -57,6 +62,9 @@ struct process * activeMQTTProcess;
 
 int startMQTT(struct process * mqttProcess)
 {
+	messagesReceived = 0;
+	messagesSent = 0;
+
 	activeMQTTProcess = mqttProcess;
 
 	if (mqttWiFiProcess == NULL)
@@ -141,6 +149,7 @@ boolean publishReadingsToMQTT(char * buffer)
 {
 	if (activeMQTTProcess->status == MQTT_OK)
 	{
+		messagesSent++;
 		Serial.println("Publishing message");
 		return mqttPubSubClient->publish(settings.mqttPublishTopic, buffer);
 	}
@@ -160,10 +169,9 @@ unsigned long timeOfLastMQTTsuccess = 0;
 
 int updateMQTT(struct process * mqttProcess)
 {
-	if (mqttWiFiProcess->status != WIFI_OK)
+	if (WiFi.status() != WL_CONNECTED)
 	{
 		mqttProcess->status = MQTT_ERROR_NO_WIFI;
-		return MQTT_ERROR_NO_WIFI;
 	}
 
 	switch (mqttProcess->status)
@@ -219,7 +227,7 @@ void mqttStatusMessage(struct process * mqttProcess, char * buffer, int bufferLe
 	switch (mqttProcess->status)
 	{
 	case MQTT_OK:
-		snprintf(buffer, bufferLength, "MQTT OK");
+		snprintf(buffer, bufferLength, "MQTT OK sent: %d rec: %d", messagesSent, messagesReceived);
 		break;
 	case MQTT_OFF:
 		snprintf(buffer, bufferLength, "MQTT OFF");

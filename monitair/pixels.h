@@ -7,7 +7,7 @@
 #define PIXEL_OFF 1
 #define PIXEL_ERROR_NO_PIXELS -1
 
-#define NO_OF_VIRTUAL_PIXELS 12
+#define NO_OF_VIRTUAL_PIXELS 8
 
 #define MAX_NO_OF_PIXELS 20
 

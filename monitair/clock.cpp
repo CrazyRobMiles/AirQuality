@@ -65,9 +65,16 @@ void getClockReadings(struct sensor * clockSensor)
 
 int updateClockReading(struct sensor * clockSensor)
 {
+	if (WiFi.status() != WL_CONNECTED)
+	{
+		clockSensor->status = CLOCK_ERROR_NO_WIFI;
+	}
+
 	switch (clockSensor->status)
 	{
+
 	case CLOCK_ERROR_NO_WIFI:
+
 		if (clockWiFiProcess->status == WIFI_OK)
 		{
 			clockSensor->status = SENSOR_OK;

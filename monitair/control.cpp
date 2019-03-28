@@ -51,13 +51,16 @@ void sendSensorReadings()
 	if (initialPowerUp ||
 		ulongDiff(currentMillis, millisAtLastSend) > (settings.mqttSecsPerUpdate * 1000))
 	{
-		initialPowerUp = false;
-		millisAtLastSend = currentMillis;
-		createSensorJson(jsonBuffer, JSON_BUFFER_SIZE);
-
-		if (publishReadingsToMQTT(jsonBuffer))
+		if (1) //activeMQTTProcess->status == MQTT_OK)
 		{
-			//Serial.println(jsonBuffer);
+			initialPowerUp = false;
+			millisAtLastSend = currentMillis;
+			createSensorJson(jsonBuffer, JSON_BUFFER_SIZE);
+
+			if (publishReadingsToMQTT(jsonBuffer))
+			{
+				//Serial.println(jsonBuffer);
+			}
 		}
 	}
 }

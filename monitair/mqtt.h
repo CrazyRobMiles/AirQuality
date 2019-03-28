@@ -19,6 +19,7 @@
 #define MQTT_CONNECT_RETRY_INTERVAL_MSECS 5000
 
 boolean publishReadingsToMQTT(char * buffer);
+extern struct process * activeMQTTProcess;
 
 int startMQTT(struct process * mqttProcess);
 int stopMQTT(struct process * mqttProcess);

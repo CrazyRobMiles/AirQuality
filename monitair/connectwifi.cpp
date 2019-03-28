@@ -92,6 +92,7 @@ int startWifi(struct process * wifiProcess)
 		if (setting_number != WIFI_SETTING_NOT_FOUND)
 		{
 			snprintf(wifiActiveAPName, WIFI_SSID_LENGTH, "%s", wifiSettings[setting_number].wifiSsid);
+			Serial.print("Connecting to ");
 			Serial.println(wifiActiveAPName);
 			WiFi.begin(wifiSettings[setting_number].wifiSsid,
 				wifiSettings[setting_number].wifiPassword);
@@ -99,7 +100,7 @@ int startWifi(struct process * wifiProcess)
 
 			while (WiFi.status() != WL_CONNECTED)
 			{
-				Serial.println("   waiting");
+				Serial.print(".");
 				delay(500);
 				if (ulongDiff(millis(), connectStartTime) > WIFI_CONNECT_TIMEOUT_MILLIS)
 				{
@@ -139,6 +140,38 @@ int stopWiFi(struct process * wifiProcess)
 	return WIFI_TURNED_OFF;
 }
 
+void displayWiFiStatus(int status)
+{
+	switch (status)
+	{
+	case WL_IDLE_STATUS:
+		Serial.print("Idle");
+		break;
+	case WL_NO_SSID_AVAIL:
+		Serial.print("No SSID");
+		break;
+	case WL_SCAN_COMPLETED:
+		Serial.print("Scan completed");
+		break;
+	case WL_CONNECTED:
+		Serial.print("Connected");
+		break;
+	case WL_CONNECT_FAILED:
+		Serial.print("Connect failed");
+		break;
+	case WL_CONNECTION_LOST:
+		Serial.print("Connection lost");
+		break;
+	case WL_DISCONNECTED:
+		Serial.print("Disconnected");
+		break;
+	default:
+		Serial.print("WiFi status value: ");
+		Serial.print(status);
+		break;
+	}
+}
+
 int updateWifi(struct process * wifiProcess)
 {
 	if (!settings.wiFiOn)
@@ -147,10 +180,10 @@ int updateWifi(struct process * wifiProcess)
 	if (wifiProcess->status == WIFI_OK)
 	{
 		int wifiStatusValue = WiFi.status();
+
 		if (wifiStatusValue != WL_CONNECTED)
 		{
-			Serial.print("Disconnected code:");
-			Serial.println(wifiStatusValue);
+			displayWiFiStatus(wifiStatusValue);
 			wifiProcess->status = WIFI_ERROR_DISCONNECTED;
 			lastWiFiConnectAtteptMillis = millis();
 		}

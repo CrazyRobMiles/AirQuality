@@ -167,17 +167,19 @@ int stopMQTT(struct process * mqttProcess)
 
 unsigned long timeOfLastMQTTsuccess = 0;
 
+
 int updateMQTT(struct process * mqttProcess)
 {
-	if (WiFi.status() != WL_CONNECTED)
-	{
-		mqttProcess->status = MQTT_ERROR_NO_WIFI;
-	}
-
 	switch (mqttProcess->status)
 	{
 
 	case MQTT_OK:
+
+		if (WiFi.status() != WL_CONNECTED)
+		{
+			mqttProcess->status = MQTT_ERROR_NO_WIFI;
+			mqttPubSubClient->disconnect();
+		}
 
 		timeOfLastMQTTsuccess = millis();
 

@@ -3,6 +3,7 @@
 #include "console.h"
 #include "settings.h"
 #include "sensors.h"
+#include "control.h"
 
 struct command {
 	char * commandName;
@@ -57,12 +58,17 @@ void doClear(char * commandLine)
 	ESP.reset();
 }
 
+void doForceSend(char * commandLine)
+{
+	forceMQTTSend();
+}
 struct command userCommands[] =
 {
 	{"help", "show all the commands", doHelp},
 	{"host", "start the configuration web host", doStartWebServer},
 	{"settings", "show all the setting values", doDumpSettings},
 	{"status", "show the sensor status", doDumpStatus},
+	{"send", "force MQTT send", doForceSend},
 	{"restart", "restart the device", doRestart},
 	{"clear", "clear all seeings and restart the device", doClear}
 };

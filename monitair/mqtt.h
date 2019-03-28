@@ -5,6 +5,7 @@
 
 #define MQTT_OK 0
 #define MQTT_OFF 1
+#define MQTT_STARTING 2
 #define MQTT_ERROR_NO_WIFI -1
 #define MQTT_ERROR_BAD_PROTOCOL -2
 #define MQTT_ERROR_BAD_CLIENT_ID -3

@@ -3,7 +3,7 @@
 #include <Arduino.h>
 
 #define MAJOR_VERSION 1
-#define MINOR_VERSION 4
+#define MINOR_VERSION 5
 
 // Sensor settings
 #define UNKNOWN_SENSOR 0

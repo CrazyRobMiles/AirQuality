@@ -14,7 +14,12 @@ void showDeviceStatus()
 }
 
 unsigned long millisAtLastSend;
-bool initialPowerUp = true;
+bool forceMQTTsend = true;
+
+void forceMQTTSend()
+{
+	forceMQTTsend = true;
+}
 
 void startDevice()
 {
@@ -48,12 +53,12 @@ void sendSensorReadings()
 {
 	unsigned long currentMillis = millis();
 
-	if (initialPowerUp ||
+	if (forceMQTTsend ||
 		ulongDiff(currentMillis, millisAtLastSend) > (settings.mqttSecsPerUpdate * 1000))
 	{
 		if (1) //activeMQTTProcess->status == MQTT_OK)
 		{
-			initialPowerUp = false;
+			forceMQTTsend = false;
 			millisAtLastSend = currentMillis;
 			createSensorJson(jsonBuffer, JSON_BUFFER_SIZE);
 

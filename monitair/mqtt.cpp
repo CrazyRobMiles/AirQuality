@@ -62,9 +62,6 @@ struct process * activeMQTTProcess;
 
 int startMQTT(struct process * mqttProcess)
 {
-	messagesReceived = 0;
-	messagesSent = 0;
-
 	activeMQTTProcess = mqttProcess;
 
 	if (mqttWiFiProcess == NULL)
@@ -72,9 +69,19 @@ int startMQTT(struct process * mqttProcess)
 		mqttWiFiProcess = findProcessByName("WiFi");
 	}
 
+	mqttProcess->status = MQTT_STARTING;
+
+	return mqttProcess->status;
+}
+
+int restartMQTT()
+{
+	messagesReceived = 0;
+	messagesSent = 0;
+
 	if (mqttWiFiProcess->status != WIFI_OK)
 	{
-		mqttProcess->status = MQTT_ERROR_NO_WIFI;
+		activeMQTTProcess->status = MQTT_ERROR_NO_WIFI;
 		return MQTT_ERROR_NO_WIFI;
 	}
 
@@ -100,32 +107,32 @@ int startMQTT(struct process * mqttProcess)
 		switch (mqttPubSubClient->state())
 		{
 		case MQTT_CONNECT_BAD_PROTOCOL:
-			mqttProcess->status = MQTT_ERROR_BAD_PROTOCOL;
+			activeMQTTProcess->status = MQTT_ERROR_BAD_PROTOCOL;
 			break;
 		case MQTT_CONNECT_BAD_CLIENT_ID:
-			mqttProcess->status = MQTT_ERROR_BAD_CLIENT_ID;
+			activeMQTTProcess->status = MQTT_ERROR_BAD_CLIENT_ID;
 			break;
 		case MQTT_CONNECT_UNAVAILABLE:
-			mqttProcess->status = MQTT_ERROR_CONNECT_UNAVAILABLE;
+			activeMQTTProcess->status = MQTT_ERROR_CONNECT_UNAVAILABLE;
 			break;
 		case MQTT_CONNECT_BAD_CREDENTIALS:
-			mqttProcess->status = MQTT_ERROR_BAD_CREDENTIALS;
+			activeMQTTProcess->status = MQTT_ERROR_BAD_CREDENTIALS;
 			break;
 		case MQTT_CONNECT_UNAUTHORIZED:
-			mqttProcess->status = MQTT_ERROR_CONNECT_UNAUTHORIZED;
+			activeMQTTProcess->status = MQTT_ERROR_CONNECT_UNAUTHORIZED;
 			break;
 		case MQTT_CONNECTION_TIMEOUT:
-			mqttProcess->status = MQTT_ERROR_BAD_PROTOCOL;
+			activeMQTTProcess->status = MQTT_ERROR_BAD_PROTOCOL;
 			break;
 		case MQTT_CONNECT_FAILED:
-			mqttProcess->status = MQTT_ERROR_CONNECT_FAILED;
+			activeMQTTProcess->status = MQTT_ERROR_CONNECT_FAILED;
 			break;
 		default:
 			mqttConnectErrorNumber = mqttPubSubClient->state();
-			mqttProcess->status = MQTT_ERROR_CONNECT_ERROR;
+			activeMQTTProcess->status = MQTT_ERROR_CONNECT_ERROR;
 			break;
 		}
-		return mqttProcess->status;
+		return activeMQTTProcess->status;
 	}
 
 	mqttPubSubClient->subscribe(settings.mqttSubscribeTopic);
@@ -141,7 +148,7 @@ int startMQTT(struct process * mqttProcess)
 	//	return MQTT_ERROR_CONNECT_MESSAGE_FAILED;
 	//}
 
-	mqttProcess->status = MQTT_OK;
+	activeMQTTProcess->status = MQTT_OK;
 	return MQTT_OK;
 }
 
@@ -194,10 +201,14 @@ int updateMQTT(struct process * mqttProcess)
 	case MQTT_OFF:
 		break;
 
+	case MQTT_STARTING:
+		mqttProcess->status = restartMQTT();
+		break;
+
 	case MQTT_ERROR_NO_WIFI:
 		if (mqttWiFiProcess->status == WIFI_OK)
 		{
-			mqttProcess->status = startMQTT(mqttProcess);
+			mqttProcess->status = restartMQTT();
 		}
 		break;
 
@@ -212,7 +223,7 @@ int updateMQTT(struct process * mqttProcess)
 	case MQTT_ERROR_LOOP_FAILED:
 		if (ulongDiff(millis(), timeOfLastMQTTsuccess) > MQTT_CONNECT_RETRY_INTERVAL_MSECS)
 		{
-			mqttProcess->status = startMQTT(mqttProcess);
+			mqttProcess->status = restartMQTT();
 			timeOfLastMQTTsuccess = millis();
 		}
 		break;
@@ -230,6 +241,9 @@ void mqttStatusMessage(struct process * mqttProcess, char * buffer, int bufferLe
 	{
 	case MQTT_OK:
 		snprintf(buffer, bufferLength, "MQTT OK sent: %d rec: %d", messagesSent, messagesReceived);
+		break;
+	case MQTT_STARTING:
+		snprintf(buffer, bufferLength, "MQTT Starting");
 		break;
 	case MQTT_OFF:
 		snprintf(buffer, bufferLength, "MQTT OFF");

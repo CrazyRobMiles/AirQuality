@@ -53,11 +53,6 @@ void setup() {
 
 void loop() 
 {
-	//struct sensor * airq = findSensorByName("Air quality");
-
-	//updateAirqReading(airq);
-	//delay(1);
-	//return;
 	updateProcesses();
 	updateSensors();
 	sendSensorReadings();
